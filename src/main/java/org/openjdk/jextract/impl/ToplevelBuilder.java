@@ -285,19 +285,17 @@ class ToplevelBuilder extends JavaSourceBuilder {
 
     // other constants
 
-    int constant_counter = 0;
     int constant_class_index = 0;
     List<ConstantBuilder> constantBuilders = new ArrayList<>();
 
-    static final int CONSTANTS_PER_CLASS = Integer.getInteger("jextract.constants.per.class", 5);
+    static final int CONSTANTS_PER_CLASS = Integer.getInteger("jextract.constants.per.class", 500);
     ConstantBuilder constantBuilder;
 
     protected void emitWithConstantClass(Consumer<ConstantBuilder> constantConsumer) {
-        if (constant_counter > CONSTANTS_PER_CLASS || constantBuilder == null) {
+        if (constantBuilder == null || constantBuilder.count() > CONSTANTS_PER_CLASS) {
             if (constantBuilder != null) {
                 constantBuilder.classEnd();
             }
-            constant_counter = 0;
             constantBuilder = new ConstantBuilder(this, "constants$" + constant_class_index++) {
                 @Override
                 String mods() {
@@ -308,6 +306,5 @@ class ToplevelBuilder extends JavaSourceBuilder {
             constantBuilder.classBegin();
         }
         constantConsumer.accept(constantBuilder);
-        constant_counter++;
     }
 }

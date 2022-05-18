@@ -18,559 +18,106 @@ public class dlfcn_h  {
     public static OfFloat C_FLOAT = Constants$root.C_FLOAT$LAYOUT;
     public static OfDouble C_DOUBLE = Constants$root.C_DOUBLE$LAYOUT;
     public static OfAddress C_POINTER = Constants$root.C_POINTER$LAYOUT;
-    public static int __DARWIN_ONLY_64_BIT_INO_T() {
+    public static int _DLFCN_H() {
+        return (int)1L;
+    }
+    public static int _FEATURES_H() {
+        return (int)1L;
+    }
+    public static int _DEFAULT_SOURCE() {
+        return (int)1L;
+    }
+    public static int __GLIBC_USE_ISOC2X() {
         return (int)0L;
     }
-    public static int __DARWIN_ONLY_UNIX_CONFORMANCE() {
+    public static int __USE_ISOC11() {
         return (int)1L;
     }
-    public static int __DARWIN_ONLY_VERS_1050() {
+    public static int __USE_ISOC99() {
+        return (int)1L;
+    }
+    public static int __USE_ISOC95() {
+        return (int)1L;
+    }
+    public static int __USE_POSIX_IMPLICITLY() {
+        return (int)1L;
+    }
+    public static int _POSIX_SOURCE() {
+        return (int)1L;
+    }
+    public static int __USE_POSIX() {
+        return (int)1L;
+    }
+    public static int __USE_POSIX2() {
+        return (int)1L;
+    }
+    public static int __USE_POSIX199309() {
+        return (int)1L;
+    }
+    public static int __USE_POSIX199506() {
+        return (int)1L;
+    }
+    public static int __USE_XOPEN2K() {
+        return (int)1L;
+    }
+    public static int __USE_XOPEN2K8() {
+        return (int)1L;
+    }
+    public static int _ATFILE_SOURCE() {
+        return (int)1L;
+    }
+    public static int __USE_MISC() {
+        return (int)1L;
+    }
+    public static int __USE_ATFILE() {
+        return (int)1L;
+    }
+    public static int __USE_FORTIFY_LEVEL() {
         return (int)0L;
     }
-    public static int __DARWIN_UNIX03() {
-        return (int)1L;
-    }
-    public static int __DARWIN_64_BIT_INO_T() {
-        return (int)1L;
-    }
-    public static int __DARWIN_VERS_1050() {
-        return (int)1L;
-    }
-    public static int __DARWIN_NON_CANCELABLE() {
+    public static int __GLIBC_USE_DEPRECATED_GETS() {
         return (int)0L;
     }
-    public static int __STDC_WANT_LIB_EXT1__() {
-        return (int)1L;
-    }
-    public static int __DARWIN_NO_LONG_LONG() {
+    public static int __GLIBC_USE_DEPRECATED_SCANF() {
         return (int)0L;
     }
-    public static int _DARWIN_FEATURE_64_BIT_INODE() {
+    public static int _STDC_PREDEF_H() {
         return (int)1L;
     }
-    public static int _DARWIN_FEATURE_ONLY_UNIX_CONFORMANCE() {
+    public static int __STDC_IEC_559__() {
         return (int)1L;
     }
-    public static int _DARWIN_FEATURE_UNIX_CONFORMANCE() {
-        return (int)3L;
-    }
-    public static int true_() {
+    public static int __STDC_IEC_559_COMPLEX__() {
         return (int)1L;
     }
-    public static int false_() {
+    public static int __GNU_LIBRARY__() {
+        return (int)6L;
+    }
+    public static int __GLIBC__() {
+        return (int)2L;
+    }
+    public static int __GLIBC_MINOR__() {
+        return (int)31L;
+    }
+    public static int _SYS_CDEFS_H() {
+        return (int)1L;
+    }
+    public static int __glibc_c99_flexarr_available() {
+        return (int)1L;
+    }
+    public static int __WORDSIZE() {
+        return (int)64L;
+    }
+    public static int __WORDSIZE_TIME64_COMPAT32() {
+        return (int)1L;
+    }
+    public static int __SYSCALL_WORDSIZE() {
+        return (int)64L;
+    }
+    public static int __LONG_DOUBLE_USES_FLOAT128() {
         return (int)0L;
     }
-    public static int __bool_true_false_are_defined() {
-        return (int)1L;
-    }
-    public static int __API_TO_BE_DEPRECATED() {
-        return (int)100000L;
-    }
-    public static int __MAC_10_0() {
-        return (int)1000L;
-    }
-    public static int __MAC_10_1() {
-        return (int)1010L;
-    }
-    public static int __MAC_10_2() {
-        return (int)1020L;
-    }
-    public static int __MAC_10_3() {
-        return (int)1030L;
-    }
-    public static int __MAC_10_4() {
-        return (int)1040L;
-    }
-    public static int __MAC_10_5() {
-        return (int)1050L;
-    }
-    public static int __MAC_10_6() {
-        return (int)1060L;
-    }
-    public static int __MAC_10_7() {
-        return (int)1070L;
-    }
-    public static int __MAC_10_8() {
-        return (int)1080L;
-    }
-    public static int __MAC_10_9() {
-        return (int)1090L;
-    }
-    public static int __MAC_10_10() {
-        return (int)101000L;
-    }
-    public static int __MAC_10_10_2() {
-        return (int)101002L;
-    }
-    public static int __MAC_10_10_3() {
-        return (int)101003L;
-    }
-    public static int __MAC_10_11() {
-        return (int)101100L;
-    }
-    public static int __MAC_10_11_2() {
-        return (int)101102L;
-    }
-    public static int __MAC_10_11_3() {
-        return (int)101103L;
-    }
-    public static int __MAC_10_11_4() {
-        return (int)101104L;
-    }
-    public static int __MAC_10_12() {
-        return (int)101200L;
-    }
-    public static int __MAC_10_12_1() {
-        return (int)101201L;
-    }
-    public static int __MAC_10_12_2() {
-        return (int)101202L;
-    }
-    public static int __MAC_10_12_4() {
-        return (int)101204L;
-    }
-    public static int __MAC_10_13() {
-        return (int)101300L;
-    }
-    public static int __MAC_10_13_1() {
-        return (int)101301L;
-    }
-    public static int __MAC_10_13_2() {
-        return (int)101302L;
-    }
-    public static int __MAC_10_13_4() {
-        return (int)101304L;
-    }
-    public static int __MAC_10_14() {
-        return (int)101400L;
-    }
-    public static int __MAC_10_14_1() {
-        return (int)101401L;
-    }
-    public static int __MAC_10_14_4() {
-        return (int)101404L;
-    }
-    public static int __MAC_10_14_6() {
-        return (int)101406L;
-    }
-    public static int __MAC_10_15() {
-        return (int)101500L;
-    }
-    public static int __MAC_10_15_1() {
-        return (int)101501L;
-    }
-    public static int __MAC_10_15_4() {
-        return (int)101504L;
-    }
-    public static int __MAC_10_16() {
-        return (int)101600L;
-    }
-    public static int __MAC_11_0() {
-        return (int)110000L;
-    }
-    public static int __MAC_11_1() {
-        return (int)110100L;
-    }
-    public static int __IPHONE_2_0() {
-        return (int)20000L;
-    }
-    public static int __IPHONE_2_1() {
-        return (int)20100L;
-    }
-    public static int __IPHONE_2_2() {
-        return (int)20200L;
-    }
-    public static int __IPHONE_3_0() {
-        return (int)30000L;
-    }
-    public static int __IPHONE_3_1() {
-        return (int)30100L;
-    }
-    public static int __IPHONE_3_2() {
-        return (int)30200L;
-    }
-    public static int __IPHONE_4_0() {
-        return (int)40000L;
-    }
-    public static int __IPHONE_4_1() {
-        return (int)40100L;
-    }
-    public static int __IPHONE_4_2() {
-        return (int)40200L;
-    }
-    public static int __IPHONE_4_3() {
-        return (int)40300L;
-    }
-    public static int __IPHONE_5_0() {
-        return (int)50000L;
-    }
-    public static int __IPHONE_5_1() {
-        return (int)50100L;
-    }
-    public static int __IPHONE_6_0() {
-        return (int)60000L;
-    }
-    public static int __IPHONE_6_1() {
-        return (int)60100L;
-    }
-    public static int __IPHONE_7_0() {
-        return (int)70000L;
-    }
-    public static int __IPHONE_7_1() {
-        return (int)70100L;
-    }
-    public static int __IPHONE_8_0() {
-        return (int)80000L;
-    }
-    public static int __IPHONE_8_1() {
-        return (int)80100L;
-    }
-    public static int __IPHONE_8_2() {
-        return (int)80200L;
-    }
-    public static int __IPHONE_8_3() {
-        return (int)80300L;
-    }
-    public static int __IPHONE_8_4() {
-        return (int)80400L;
-    }
-    public static int __IPHONE_9_0() {
-        return (int)90000L;
-    }
-    public static int __IPHONE_9_1() {
-        return (int)90100L;
-    }
-    public static int __IPHONE_9_2() {
-        return (int)90200L;
-    }
-    public static int __IPHONE_9_3() {
-        return (int)90300L;
-    }
-    public static int __IPHONE_10_0() {
-        return (int)100000L;
-    }
-    public static int __IPHONE_10_1() {
-        return (int)100100L;
-    }
-    public static int __IPHONE_10_2() {
-        return (int)100200L;
-    }
-    public static int __IPHONE_10_3() {
-        return (int)100300L;
-    }
-    public static int __IPHONE_11_0() {
-        return (int)110000L;
-    }
-    public static int __IPHONE_11_1() {
-        return (int)110100L;
-    }
-    public static int __IPHONE_11_2() {
-        return (int)110200L;
-    }
-    public static int __IPHONE_11_3() {
-        return (int)110300L;
-    }
-    public static int __IPHONE_11_4() {
-        return (int)110400L;
-    }
-    public static int __IPHONE_12_0() {
-        return (int)120000L;
-    }
-    public static int __IPHONE_12_1() {
-        return (int)120100L;
-    }
-    public static int __IPHONE_12_2() {
-        return (int)120200L;
-    }
-    public static int __IPHONE_12_3() {
-        return (int)120300L;
-    }
-    public static int __IPHONE_12_4() {
-        return (int)120400L;
-    }
-    public static int __IPHONE_13_0() {
-        return (int)130000L;
-    }
-    public static int __IPHONE_13_1() {
-        return (int)130100L;
-    }
-    public static int __IPHONE_13_2() {
-        return (int)130200L;
-    }
-    public static int __IPHONE_13_3() {
-        return (int)130300L;
-    }
-    public static int __IPHONE_13_4() {
-        return (int)130400L;
-    }
-    public static int __IPHONE_13_5() {
-        return (int)130500L;
-    }
-    public static int __IPHONE_13_6() {
-        return (int)130600L;
-    }
-    public static int __IPHONE_13_7() {
-        return (int)130700L;
-    }
-    public static int __IPHONE_14_0() {
-        return (int)140000L;
-    }
-    public static int __IPHONE_14_1() {
-        return (int)140100L;
-    }
-    public static int __IPHONE_14_2() {
-        return (int)140200L;
-    }
-    public static int __IPHONE_14_3() {
-        return (int)140300L;
-    }
-    public static int __TVOS_9_0() {
-        return (int)90000L;
-    }
-    public static int __TVOS_9_1() {
-        return (int)90100L;
-    }
-    public static int __TVOS_9_2() {
-        return (int)90200L;
-    }
-    public static int __TVOS_10_0() {
-        return (int)100000L;
-    }
-    public static int __TVOS_10_0_1() {
-        return (int)100001L;
-    }
-    public static int __TVOS_10_1() {
-        return (int)100100L;
-    }
-    public static int __TVOS_10_2() {
-        return (int)100200L;
-    }
-    public static int __TVOS_11_0() {
-        return (int)110000L;
-    }
-    public static int __TVOS_11_1() {
-        return (int)110100L;
-    }
-    public static int __TVOS_11_2() {
-        return (int)110200L;
-    }
-    public static int __TVOS_11_3() {
-        return (int)110300L;
-    }
-    public static int __TVOS_11_4() {
-        return (int)110400L;
-    }
-    public static int __TVOS_12_0() {
-        return (int)120000L;
-    }
-    public static int __TVOS_12_1() {
-        return (int)120100L;
-    }
-    public static int __TVOS_12_2() {
-        return (int)120200L;
-    }
-    public static int __TVOS_12_3() {
-        return (int)120300L;
-    }
-    public static int __TVOS_12_4() {
-        return (int)120400L;
-    }
-    public static int __TVOS_13_0() {
-        return (int)130000L;
-    }
-    public static int __TVOS_13_2() {
-        return (int)130200L;
-    }
-    public static int __TVOS_13_3() {
-        return (int)130300L;
-    }
-    public static int __TVOS_13_4() {
-        return (int)130400L;
-    }
-    public static int __TVOS_14_0() {
-        return (int)140000L;
-    }
-    public static int __TVOS_14_1() {
-        return (int)140100L;
-    }
-    public static int __TVOS_14_2() {
-        return (int)140200L;
-    }
-    public static int __TVOS_14_3() {
-        return (int)140300L;
-    }
-    public static int __WATCHOS_1_0() {
-        return (int)10000L;
-    }
-    public static int __WATCHOS_2_0() {
-        return (int)20000L;
-    }
-    public static int __WATCHOS_2_1() {
-        return (int)20100L;
-    }
-    public static int __WATCHOS_2_2() {
-        return (int)20200L;
-    }
-    public static int __WATCHOS_3_0() {
-        return (int)30000L;
-    }
-    public static int __WATCHOS_3_1() {
-        return (int)30100L;
-    }
-    public static int __WATCHOS_3_1_1() {
-        return (int)30101L;
-    }
-    public static int __WATCHOS_3_2() {
-        return (int)30200L;
-    }
-    public static int __WATCHOS_4_0() {
-        return (int)40000L;
-    }
-    public static int __WATCHOS_4_1() {
-        return (int)40100L;
-    }
-    public static int __WATCHOS_4_2() {
-        return (int)40200L;
-    }
-    public static int __WATCHOS_4_3() {
-        return (int)40300L;
-    }
-    public static int __WATCHOS_5_0() {
-        return (int)50000L;
-    }
-    public static int __WATCHOS_5_1() {
-        return (int)50100L;
-    }
-    public static int __WATCHOS_5_2() {
-        return (int)50200L;
-    }
-    public static int __WATCHOS_5_3() {
-        return (int)50300L;
-    }
-    public static int __WATCHOS_6_0() {
-        return (int)60000L;
-    }
-    public static int __WATCHOS_6_1() {
-        return (int)60100L;
-    }
-    public static int __WATCHOS_6_2() {
-        return (int)60200L;
-    }
-    public static int __WATCHOS_7_0() {
-        return (int)70000L;
-    }
-    public static int __WATCHOS_7_1() {
-        return (int)70100L;
-    }
-    public static int __WATCHOS_7_2() {
-        return (int)70200L;
-    }
-    public static int MAC_OS_X_VERSION_10_0() {
-        return (int)1000L;
-    }
-    public static int MAC_OS_X_VERSION_10_1() {
-        return (int)1010L;
-    }
-    public static int MAC_OS_X_VERSION_10_2() {
-        return (int)1020L;
-    }
-    public static int MAC_OS_X_VERSION_10_3() {
-        return (int)1030L;
-    }
-    public static int MAC_OS_X_VERSION_10_4() {
-        return (int)1040L;
-    }
-    public static int MAC_OS_X_VERSION_10_5() {
-        return (int)1050L;
-    }
-    public static int MAC_OS_X_VERSION_10_6() {
-        return (int)1060L;
-    }
-    public static int MAC_OS_X_VERSION_10_7() {
-        return (int)1070L;
-    }
-    public static int MAC_OS_X_VERSION_10_8() {
-        return (int)1080L;
-    }
-    public static int MAC_OS_X_VERSION_10_9() {
-        return (int)1090L;
-    }
-    public static int MAC_OS_X_VERSION_10_10() {
-        return (int)101000L;
-    }
-    public static int MAC_OS_X_VERSION_10_10_2() {
-        return (int)101002L;
-    }
-    public static int MAC_OS_X_VERSION_10_10_3() {
-        return (int)101003L;
-    }
-    public static int MAC_OS_X_VERSION_10_11() {
-        return (int)101100L;
-    }
-    public static int MAC_OS_X_VERSION_10_11_2() {
-        return (int)101102L;
-    }
-    public static int MAC_OS_X_VERSION_10_11_3() {
-        return (int)101103L;
-    }
-    public static int MAC_OS_X_VERSION_10_11_4() {
-        return (int)101104L;
-    }
-    public static int MAC_OS_X_VERSION_10_12() {
-        return (int)101200L;
-    }
-    public static int MAC_OS_X_VERSION_10_12_1() {
-        return (int)101201L;
-    }
-    public static int MAC_OS_X_VERSION_10_12_2() {
-        return (int)101202L;
-    }
-    public static int MAC_OS_X_VERSION_10_12_4() {
-        return (int)101204L;
-    }
-    public static int MAC_OS_X_VERSION_10_13() {
-        return (int)101300L;
-    }
-    public static int MAC_OS_X_VERSION_10_13_1() {
-        return (int)101301L;
-    }
-    public static int MAC_OS_X_VERSION_10_13_2() {
-        return (int)101302L;
-    }
-    public static int MAC_OS_X_VERSION_10_13_4() {
-        return (int)101304L;
-    }
-    public static int MAC_OS_X_VERSION_10_14() {
-        return (int)101400L;
-    }
-    public static int MAC_OS_X_VERSION_10_14_1() {
-        return (int)101401L;
-    }
-    public static int MAC_OS_X_VERSION_10_14_4() {
-        return (int)101404L;
-    }
-    public static int MAC_OS_X_VERSION_10_14_6() {
-        return (int)101406L;
-    }
-    public static int MAC_OS_X_VERSION_10_15() {
-        return (int)101500L;
-    }
-    public static int MAC_OS_X_VERSION_10_15_1() {
-        return (int)101501L;
-    }
-    public static int MAC_OS_X_VERSION_10_16() {
-        return (int)101600L;
-    }
-    public static int MAC_OS_VERSION_11_0() {
-        return (int)110000L;
-    }
-    public static int __DRIVERKIT_19_0() {
-        return (int)190000L;
-    }
-    public static int __DRIVERKIT_20_0() {
-        return (int)200000L;
-    }
-    public static int __ENABLE_LEGACY_MAC_AVAILABILITY() {
+    public static int __HAVE_GENERIC_SELECTION() {
         return (int)1L;
     }
     public static int RTLD_LAZY() {
@@ -579,28 +126,31 @@ public class dlfcn_h  {
     public static int RTLD_NOW() {
         return (int)2L;
     }
-    public static int RTLD_LOCAL() {
-        return (int)4L;
-    }
-    public static int RTLD_GLOBAL() {
-        return (int)8L;
+    public static int RTLD_BINDING_MASK() {
+        return (int)3L;
     }
     public static int RTLD_NOLOAD() {
-        return (int)16L;
+        return (int)4L;
     }
-    public static int RTLD_NODELETE() {
-        return (int)128L;
+    public static int RTLD_DEEPBIND() {
+        return (int)8L;
     }
-    public static int RTLD_FIRST() {
+    public static int RTLD_GLOBAL() {
         return (int)256L;
     }
-    public static MethodHandle dladdr$MH() {
-        return RuntimeHelper.requireNonNull(constants$0.dladdr$MH,"dladdr");
+    public static int RTLD_LOCAL() {
+        return (int)0L;
     }
-    public static int dladdr ( Addressable x0,  Addressable x1) {
-        var mh$ = RuntimeHelper.requireNonNull(constants$0.dladdr$MH, "dladdr");
+    public static int RTLD_NODELETE() {
+        return (int)4096L;
+    }
+    public static MethodHandle dlopen$MH() {
+        return RuntimeHelper.requireNonNull(constants$0.dlopen$MH,"dlopen");
+    }
+    public static MemoryAddress dlopen ( Addressable __file,  int __mode) {
+        var mh$ = RuntimeHelper.requireNonNull(constants$0.dlopen$MH, "dlopen");
         try {
-            return (int)mh$.invokeExact(x0, x1);
+            return (java.lang.foreign.MemoryAddress)mh$.invokeExact(__file, __mode);
         } catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
@@ -616,6 +166,17 @@ public class dlfcn_h  {
             throw new AssertionError("should not reach here", ex$);
         }
     }
+    public static MethodHandle dlsym$MH() {
+        return RuntimeHelper.requireNonNull(constants$0.dlsym$MH,"dlsym");
+    }
+    public static MemoryAddress dlsym ( Addressable __handle,  Addressable __name) {
+        var mh$ = RuntimeHelper.requireNonNull(constants$0.dlsym$MH, "dlsym");
+        try {
+            return (java.lang.foreign.MemoryAddress)mh$.invokeExact(__handle, __name);
+        } catch (Throwable ex$) {
+            throw new AssertionError("should not reach here", ex$);
+        }
+    }
     public static MethodHandle dlerror$MH() {
         return RuntimeHelper.requireNonNull(constants$0.dlerror$MH,"dlerror");
     }
@@ -627,74 +188,11 @@ public class dlfcn_h  {
             throw new AssertionError("should not reach here", ex$);
         }
     }
-    public static MethodHandle dlopen$MH() {
-        return RuntimeHelper.requireNonNull(constants$0.dlopen$MH,"dlopen");
+    public static long _POSIX_C_SOURCE() {
+        return 200809L;
     }
-    public static MemoryAddress dlopen ( Addressable __path,  int __mode) {
-        var mh$ = RuntimeHelper.requireNonNull(constants$0.dlopen$MH, "dlopen");
-        try {
-            return (java.lang.foreign.MemoryAddress)mh$.invokeExact(__path, __mode);
-        } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-        }
-    }
-    public static MethodHandle dlsym$MH() {
-        return RuntimeHelper.requireNonNull(constants$0.dlsym$MH,"dlsym");
-    }
-    public static MemoryAddress dlsym ( Addressable __handle,  Addressable __symbol) {
-        var mh$ = RuntimeHelper.requireNonNull(constants$0.dlsym$MH, "dlsym");
-        try {
-            return (java.lang.foreign.MemoryAddress)mh$.invokeExact(__handle, __symbol);
-        } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-        }
-    }
-    public static MethodHandle dlopen_preflight$MH() {
-        return RuntimeHelper.requireNonNull(constants$0.dlopen_preflight$MH,"dlopen_preflight");
-    }
-    public static boolean dlopen_preflight ( Addressable __path) {
-        var mh$ = RuntimeHelper.requireNonNull(constants$0.dlopen_preflight$MH, "dlopen_preflight");
-        try {
-            return (boolean)mh$.invokeExact(__path);
-        } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-        }
-    }
-    public static MemorySegment __DARWIN_SUF_64_BIT_INO_T() {
-        return constants$1.__DARWIN_SUF_64_BIT_INO_T$SEGMENT;
-    }
-    public static MemorySegment __DARWIN_SUF_1050() {
-        return constants$1.__DARWIN_SUF_1050$SEGMENT;
-    }
-    public static MemorySegment __DARWIN_SUF_EXTSN() {
-        return constants$1.__DARWIN_SUF_EXTSN$SEGMENT;
-    }
-    public static long __DARWIN_C_ANSI() {
-        return 4096L;
-    }
-    public static long __DARWIN_C_FULL() {
-        return 900000L;
-    }
-    public static long __DARWIN_C_LEVEL() {
-        return 900000L;
-    }
-    public static int __MAC_OS_X_VERSION_MIN_REQUIRED() {
-        return (int)101700L;
-    }
-    public static int __MAC_OS_X_VERSION_MAX_ALLOWED() {
-        return (int)110100L;
-    }
-    public static MemoryAddress RTLD_NEXT() {
-        return constants$1.RTLD_NEXT$ADDR;
-    }
-    public static MemoryAddress RTLD_DEFAULT() {
-        return constants$1.RTLD_DEFAULT$ADDR;
-    }
-    public static MemoryAddress RTLD_SELF() {
-        return constants$1.RTLD_SELF$ADDR;
-    }
-    public static MemoryAddress RTLD_MAIN_ONLY() {
-        return constants$2.RTLD_MAIN_ONLY$ADDR;
+    public static long __STDC_ISO_10646__() {
+        return 201706L;
     }
 }
 

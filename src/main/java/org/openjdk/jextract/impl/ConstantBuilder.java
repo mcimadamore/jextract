@@ -36,6 +36,7 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,8 +55,7 @@ public class ConstantBuilder extends ClassSourceBuilder {
     }
 
     String memberMods() {
-        return kind == ClassSourceBuilder.Kind.CLASS ?
-                "static final " : "";
+        return "lazy-static ";
     }
 
     // public API
@@ -91,9 +91,23 @@ public class ConstantBuilder extends ClassSourceBuilder {
     }
 
     public Constant addFunctionDesc(String javaName, FunctionDescriptor desc) {
-        return emitIfAbsent(javaName, Constant.Kind.FUNCTION_DESCRIPTOR,
-                () -> emitFunctionDescField(javaName, desc));
+        total++;
+        Constant c = descs.get(desc);
+        if (c == null) {
+            added++;
+            c = emitIfAbsent(javaName, Constant.Kind.FUNCTION_DESCRIPTOR,
+                    () -> emitFunctionDescField(javaName, desc));
+            descs.put(desc, c);
+        } else {
+            shared++;
+        }
+        return c;
     }
+
+    public static HashMap<FunctionDescriptor, Constant> descs = new HashMap<>();
+    public static int total = 0;
+    public static int added = 0;
+    public static int shared = 0;
 
     public Constant addConstantDesc(String javaName, Class<?> type, Object value) {
         if (type == MemorySegment.class) {
@@ -105,6 +119,10 @@ public class ConstantBuilder extends ClassSourceBuilder {
         } else {
             throw new UnsupportedOperationException();
         }
+    }
+
+    public int count() {
+        return namesGenerated.size();
     }
 
     static class Constant {

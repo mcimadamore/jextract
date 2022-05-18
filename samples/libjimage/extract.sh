@@ -1,11 +1,10 @@
-jextract \
-  -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include \
+/w/lt/panama/jextract-dev-open/build/jextract/bin/jextract \
   -t org.openjdk \
   --source \
+  -l jimage \
   jimage.h
 
-jextract \
-  -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include \
+/w/lt/panama/jextract-dev-open/build/jextract/bin/jextract \
   -t org.unix \
   --source \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/dlfcn.h 
+  /usr/include/dlfcn.h 

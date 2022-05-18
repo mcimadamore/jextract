@@ -27,6 +27,7 @@ package org.openjdk.jextract;
 
 import org.openjdk.jextract.impl.ClangException;
 import org.openjdk.jextract.impl.CommandLine;
+import org.openjdk.jextract.impl.ConstantBuilder;
 import org.openjdk.jextract.impl.IncludeHelper;
 import org.openjdk.jextract.impl.OutputFactory;
 import org.openjdk.jextract.impl.Parser;
@@ -493,6 +494,11 @@ public final class JextractTool {
             }
             return RUNTIME_ERROR;
         }
+
+        System.out.println("STATS");
+        System.out.println("#total descriptors: " + ConstantBuilder.total);
+        System.out.println("#unique descriptors: " + ConstantBuilder.added);
+        System.out.println("#shareable descriptors: " + ConstantBuilder.shared);
 
         return SUCCESS;
     }
