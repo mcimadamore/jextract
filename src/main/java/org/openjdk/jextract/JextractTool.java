@@ -333,7 +333,7 @@ public final class JextractTool {
         OptionParser parser = new OptionParser();
         parser.accepts("-D", format("help.D"), true);
         parser.accepts("--dump-includes", format("help.dump-includes"), true);
-        parser.accepts("--filter-kind", format("help.dump-includes"), true);
+        parser.accepts("--filter-mode", format("help.filter-mode"), true);
         for (IncludeHelper.IncludeKind includeKind : IncludeHelper.IncludeKind.values()) {
             parser.accepts("--" + includeKind.optionName(), format("help." + includeKind.optionName()), true);
         }
@@ -415,9 +415,9 @@ public final class JextractTool {
             builder.setDumpIncludeFile(optionSet.valueOf("--dump-includes"));
         }
 
-        if (optionSet.has("--filter-kind")) {
+        if (optionSet.has("--filter-mode")) {
             try {
-                builder.setFilterKind(optionSet.valueOf("--filter-kind"));
+                builder.setFilterKind(optionSet.valueOf("--filter-mode"));
             } catch (UnsupportedOperationException ex) {
                 printOptionError("Unexpected filter kind; filter kind must be one of \"[auto, strict]\"");
                 return OPTION_ERROR;
