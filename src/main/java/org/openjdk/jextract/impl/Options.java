@@ -39,10 +39,12 @@ public final class Options {
     public final String outputDir;
     public final boolean source;
     public final IncludeHelper includeHelper;
+    public final DependencyAnalyzer dependencyAnalyzer;
 
     private Options(List<String> clangArgs, List<String> libraryNames,
             List<String> filters, String targetPackage,
-            String outputDir, boolean source, IncludeHelper includeHelper) {
+            String outputDir, boolean source, IncludeHelper includeHelper,
+            DependencyAnalyzer dependencyAnalyzer) {
         this.clangArgs = clangArgs;
         this.libraryNames = libraryNames;
         this.filters = filters;
@@ -50,6 +52,7 @@ public final class Options {
         this.outputDir = outputDir;
         this.source = source;
         this.includeHelper = includeHelper;
+        this.dependencyAnalyzer = dependencyAnalyzer;
     }
 
     public static Builder builder() {
@@ -68,6 +71,7 @@ public final class Options {
         private String outputDir;
         private boolean source;
         private IncludeHelper includeHelper = new IncludeHelper();
+        private DependencyAnalyzer dependencyAnalyzer = DependencyAnalyzer.STRICT;
 
         public Builder() {
             this.clangArgs = new ArrayList<>();
@@ -83,7 +87,7 @@ public final class Options {
                     Collections.unmodifiableList(clangArgs),
                     Collections.unmodifiableList(libraryNames),
                     Collections.unmodifiableList(filters),
-                    targetPackage, outputDir, source, includeHelper
+                    targetPackage, outputDir, source, includeHelper, dependencyAnalyzer
             );
         }
 
@@ -117,6 +121,16 @@ public final class Options {
 
         public void addIncludeSymbol(IncludeHelper.IncludeKind kind, String symbolName) {
             includeHelper.addSymbol(kind, symbolName);
+        }
+
+        public void setFilterKind(String filterKind) {
+            if (filterKind.equals("strict")) {
+                // do nothing - this is the default
+            } else if (filterKind.equals("auto")) {
+                dependencyAnalyzer = DependencyAnalyzer.auto(includeHelper);
+            } else {
+                throw new UnsupportedOperationException(filterKind);
+            }
         }
     }
 }

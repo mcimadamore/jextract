@@ -69,7 +69,7 @@ public class IncludeHelper {
             } else if (d instanceof Declaration.Scoped scoped) {
                 return fromScoped(scoped);
             } else {
-                throw new IllegalStateException("Cannot get here!");
+                throw new IllegalStateException("Cannot get here! " + d);
             }
         }
 
@@ -77,7 +77,7 @@ public class IncludeHelper {
             return switch (scoped.kind()) {
                 case STRUCT -> IncludeKind.STRUCT;
                 case UNION ->  IncludeKind.UNION;
-                default -> throw new IllegalStateException("Cannot get here!");
+                default -> null;
             };
         }
     }
@@ -108,7 +108,8 @@ public class IncludeHelper {
     }
 
     public boolean isIncluded(Declaration.Scoped scoped) {
-        return checkIncludedAndAddIfNeeded(IncludeKind.fromScoped(scoped), scoped);
+        IncludeKind kind = IncludeKind.fromScoped(scoped);
+        return (kind != null) && checkIncludedAndAddIfNeeded(kind, scoped);
     }
 
     private boolean checkIncludedAndAddIfNeeded(IncludeKind kind, Declaration declaration) {

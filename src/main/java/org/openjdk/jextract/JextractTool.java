@@ -333,6 +333,7 @@ public final class JextractTool {
         OptionParser parser = new OptionParser();
         parser.accepts("-D", format("help.D"), true);
         parser.accepts("--dump-includes", format("help.dump-includes"), true);
+        parser.accepts("--filter-kind", format("help.dump-includes"), true);
         for (IncludeHelper.IncludeKind includeKind : IncludeHelper.IncludeKind.values()) {
             parser.accepts("--" + includeKind.optionName(), format("help." + includeKind.optionName()), true);
         }
@@ -414,6 +415,15 @@ public final class JextractTool {
             builder.setDumpIncludeFile(optionSet.valueOf("--dump-includes"));
         }
 
+        if (optionSet.has("--filter-kind")) {
+            try {
+                builder.setFilterKind(optionSet.valueOf("--filter-kind"));
+            } catch (UnsupportedOperationException ex) {
+                printOptionError("Unexpected filter kind; filter kind must be one of \"[auto, strict]\"");
+                return OPTION_ERROR;
+            }
+        }
+
         if (optionSet.has("--output")) {
             builder.setOutputDir(optionSet.valueOf("--output"));
         }
@@ -460,6 +470,9 @@ public final class JextractTool {
             if (JextractTool.DEBUG) {
                 System.out.println(toplevel);
             }
+
+            // augment imported decls
+            options.dependencyAnalyzer.augment(toplevel);
 
             String headerName = optionSet.has("--header-class-name") ?
                 optionSet.valueOf("--header-class-name") :
