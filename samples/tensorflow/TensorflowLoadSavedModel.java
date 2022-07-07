@@ -30,7 +30,7 @@
  */
 
 import java.lang.foreign.*;
-import static java.lang.foreign.MemoryAddress.*;
+import static java.lang.foreign.MemorySegment.*;
 import static org.tensorflow.c_api_h.*;
 import org.tensorflow.*;
 
@@ -45,8 +45,8 @@ public class TensorflowLoadSavedModel {
             System.exit(1);
         }
 
-        try (var session = MemorySession.openConfined()) {
-            var allocator = SegmentAllocator.newNativeArena(session);
+        try (var session = NativeArena.openConfined()) {
+            var allocator = SegmentAllocator.bumpAllocator(session);
             var graph = TF_NewGraph();
             var status = TF_NewStatus();
             var sessionOpts = TF_NewSessionOptions();
