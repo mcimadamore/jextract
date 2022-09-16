@@ -51,6 +51,7 @@ class StructBuilder extends ConstantBuilder {
     private final GroupLayout structLayout;
     private final Type structType;
     private final Deque<String> prefixElementNames;
+    private ValueLayout flexibleArrayMemberLayout = null;
 
     StructBuilder(JavaSourceBuilder enclosing, String name, GroupLayout structLayout, Type structType) {
         super(enclosing, name);
@@ -89,10 +90,16 @@ class StructBuilder extends ConstantBuilder {
     @Override
     JavaSourceBuilder classEnd() {
         if (!inAnonymousNested()) {
-            emitSizeof();
-            emitAllocatorAllocate();
-            emitAllocatorAllocateArray();
-            emitOfAddressScoped();
+            if (flexibleArrayMemberLayout == null) {
+                emitSizeof();
+                emitAllocatorAllocate();
+                emitAllocatorAllocateArray();
+                emitOfAddressScoped();
+            } else {
+                emitFlexibleArrayAllocatorAllocate();
+                emitFlexibleArrayOfAddressScoped();
+                emitFlexibleArraySizeof();
+            }
             return super.classEnd();
         } else {
             // we're in an anonymous struct which got merged into this one, return this very builder and keep it open
@@ -127,8 +134,9 @@ class StructBuilder extends ConstantBuilder {
 
     @Override
     public void addVar(String javaName, String nativeName, MemoryLayout layout, Optional<String> fiName) {
+        long offset = -1;
         try {
-            structLayout.byteOffset(elementPaths(nativeName));
+            offset = structLayout.byteOffset(elementPaths(nativeName));
         } catch (UnsupportedOperationException uoe) {
             // bad layout - do nothing
             OutputFactory.warn("skipping '" + className() + "." + nativeName + "' : " + uoe.toString());
@@ -137,6 +145,15 @@ class StructBuilder extends ConstantBuilder {
         if (layout instanceof SequenceLayout || layout instanceof GroupLayout) {
             if (layout.byteSize() > 0) {
                 emitSegmentGetter(javaName, nativeName, layout);
+            } else if (layout instanceof SequenceLayout seq) {
+                MemoryLayout memberLayout = seq.elementLayout();
+                if (memberLayout instanceof ValueLayout valueLayout) {
+                    flexibleArrayMemberLayout = valueLayout;
+                    emitFlexibleArrayGetter(javaName, nativeName);
+                    Constant memberLayoutConstant = addLayout(javaName, valueLayout);
+                    emitIndexedFlexibleArrayGetter(memberLayoutConstant, offset, javaName, valueLayout.carrier());
+                    emitIndexedFlexibleArraySetter(memberLayoutConstant, offset, javaName, valueLayout.carrier());
+                }
             }
         } else if (layout instanceof ValueLayout valueLayout) {
             Constant vhConstant = addFieldVarHandle(javaName, nativeName, valueLayout, layoutField(), prefixNamesList())
@@ -304,6 +321,100 @@ class StructBuilder extends ConstantBuilder {
         append("*sizeof()), ");
         append(x);
         append(");\n");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+    }
+
+    private void emitFlexibleArrayGetter(String javaName, String nativeName) {
+        incrAlign();
+        indent();
+        String seg = safeParameterName("seg");
+        String elemSize = safeParameterName("elemSize");
+        append(MEMBER_MODS + " MemorySegment " + javaName + "$slice(MemorySegment " + seg + ", long " + elemSize + ") {\n");
+        incrAlign();
+        indent();
+        append("return " + seg + ".asSlice(");
+        append(structLayout.byteOffset(elementPaths(nativeName)));
+        append(", ");
+        append(flexibleArrayMemberLayout.byteSize() + " * " + elemSize);
+        append(");\n");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+    }
+
+    private void emitIndexedFlexibleArrayGetter(Constant layout, long offset, String javaName, Class<?> type) {
+        incrAlign();
+        indent();
+        String index = safeParameterName("index");
+        String seg = safeParameterName("seg");
+        String params = MemorySegment.class.getSimpleName() + " " + seg + ", long " + index;
+        append(MEMBER_MODS + " " + type.getSimpleName() + " " + javaName + "$get(" + params + ") {\n");
+        incrAlign();
+        indent();
+        append("return seg.get(" + layout.accessExpression() + ", ");
+        append(offset + " + (" + index + " * " + flexibleArrayMemberLayout.byteSize() + "));\n");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+    }
+
+    private void emitIndexedFlexibleArraySetter(Constant layout, long offset, String javaName, Class<?> type) {
+        incrAlign();
+        indent();
+        String index = safeParameterName("index");
+        String seg = safeParameterName("seg");
+        String x = safeParameterName("x");
+        String params = MemorySegment.class.getSimpleName() + " " + seg +
+                ", long " + index + ", " + type.getSimpleName() + " " + x;
+        append(MEMBER_MODS + " void " + javaName + "$set(" + params + ") {\n");
+        incrAlign();
+        indent();
+        append("seg.set(" + layout.accessExpression() + ", ");
+        append(offset + " + (" + index + " * " + flexibleArrayMemberLayout.byteSize() + "),");
+        append(" " + x + ");\n");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+    }
+
+    private void emitFlexibleArrayAllocatorAllocate() {
+        incrAlign();
+        indent();
+        append(MEMBER_MODS);
+        append(" MemorySegment allocate(SegmentAllocator allocator, long elemSize) { ");
+        append("return allocator.allocate($LAYOUT().byteSize() + (elemSize * " + flexibleArrayMemberLayout.byteSize() + "), $LAYOUT().byteAlignment()); }\n");
+        decrAlign();
+    }
+
+    private void emitFlexibleArrayOfAddressScoped() {
+        incrAlign();
+        indent();
+        append(MEMBER_MODS);
+        append(" MemorySegment ofAddress(MemorySegment addr, long elemSize, MemorySession session) {\n");
+        incrAlign();
+        indent();
+        append("return MemorySegment.ofAddress(addr.address(), sizeof(elemSize));");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+    }
+
+    private void emitFlexibleArraySizeof() {
+        incrAlign();
+        indent();
+        append(MEMBER_MODS);
+        append(" long sizeof(long elemSize) {\n");
+        incrAlign();
+        indent();
+        append("return $LAYOUT().byteSize() + (elemSize * ");
+        append(flexibleArrayMemberLayout.byteSize() + ");\n");
         decrAlign();
         indent();
         append("}\n");
