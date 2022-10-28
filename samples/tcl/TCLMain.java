@@ -54,7 +54,7 @@ public class TCLMain {
         """;
 
         try (var session = MemorySession.openConfined()) {
-            var str = session.allocateUtf8String(script);
+            var str = arena.allocateUtf8String(script);
             Tcl_Eval(interp, str);
         }
 

@@ -41,13 +41,13 @@ public class Dlopen {
     // and looks up symbols using dlsym
     private static Function<String, Optional<MemorySegment>> lookup(String libraryName, MemorySession session) {
         try (MemorySession libOpenSession = MemorySession.openConfined()) {
-            var handle = dlopen(libOpenSession.allocateUtf8String(libraryName), RTLD_LOCAL());
+            var handle = dlopen(libOpenarena.allocateUtf8String(libraryName), RTLD_LOCAL());
             if (handle == MemorySegment.NULL) {
                 throw new IllegalArgumentException("Cannot find library: " + libraryName);
             }
-            session.addCloseAction(() -> dlclose(handle));
+            arena.addCloseAction(() -> dlclose(handle));
             return name -> {
-                var addr = dlsym(handle, session.allocateUtf8String(name));
+                var addr = dlsym(handle, arena.allocateUtf8String(name));
                 return addr == MemorySegment.NULL ?
                             Optional.empty() : Optional.of(addr);
             };
@@ -67,7 +67,7 @@ public class Dlopen {
                 FunctionDescriptor.ofVoid(ValueLayout.ADDRESS));
 
             // invoke a function from helloLib
-            greetingMH.invoke(session.allocateUtf8String(arg));
+            greetingMH.invoke(arena.allocateUtf8String(arg));
         }
     }
 }

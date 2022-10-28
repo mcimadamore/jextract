@@ -42,7 +42,7 @@ public class PythonMain {
 
         Py_Initialize();
         try (var session = MemorySession.openConfined()) {
-            var str = session.allocateUtf8String(script);
+            var str = arena.allocateUtf8String(script);
             PyRun_SimpleStringFlags(str, NULL);
             Py_Finalize();
         }

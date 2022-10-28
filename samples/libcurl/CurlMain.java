@@ -42,7 +42,7 @@ public class CurlMain {
        var curl = curl_easy_init();
        if(!curl.equals(NULL)) {
            try (var session = MemorySession.openConfined()) {
-               var url = session.allocateUtf8String(urlStr);
+               var url = arena.allocateUtf8String(urlStr);
                curl_easy_setopt(curl, CURLOPT_URL(), url.address());
                int res = curl_easy_perform(curl);
                if (res != CURLE_OK()) {

@@ -37,7 +37,7 @@ import org.unix.*;
 public class Readline {
     public static void main(String[] args) {
        try (var session = MemorySession.openConfined()) {
-            var url = session.allocateUtf8String("name? ");
+            var url = arena.allocateUtf8String("name? ");
 
             // call "readline" API
             var p = readline(url);

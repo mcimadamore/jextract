@@ -47,8 +47,8 @@ public class JImageFile {
            return;
         }
         try (var session = MemorySession.openConfined()) {
-            var jintResPtr = session.allocate(jint);
-            var moduleFilePath = session.allocateUtf8String(javaHome + "/lib/modules");
+            var jintResPtr = arena.allocate(jint);
+            var moduleFilePath = arena.allocateUtf8String(javaHome + "/lib/modules");
             var jimageFile = JIMAGE_Open(moduleFilePath, jintResPtr);
 
             if (jimageFile == NULL) {
@@ -56,7 +56,7 @@ public class JImageFile {
                 return;
             }
             var mod = JIMAGE_PackageToModule(jimageFile,
-                session.allocateUtf8String("java/util"));
+                arena.allocateUtf8String("java/util"));
             System.out.println(mod);
 
             // const char* module_name, const char* version, const char* package,

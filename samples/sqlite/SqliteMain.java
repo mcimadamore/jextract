@@ -40,12 +40,12 @@ public class SqliteMain {
    public static void main(String[] args) throws Exception {
         try (var session = MemorySession.openConfined()) {
             // char** errMsgPtrPtr;
-            var errMsgPtrPtr = session.allocate(C_POINTER);
+            var errMsgPtrPtr = arena.allocate(C_POINTER);
 
             // sqlite3** dbPtrPtr;
-            var dbPtrPtr = session.allocate(C_POINTER);
+            var dbPtrPtr = arena.allocate(C_POINTER);
 
-            int rc = sqlite3_open(session.allocateUtf8String("employee.db"), dbPtrPtr);
+            int rc = sqlite3_open(arena.allocateUtf8String("employee.db"), dbPtrPtr);
             if (rc != 0) {
                 System.err.println("sqlite3_open failed: " + rc);
                 return;
@@ -57,7 +57,7 @@ public class SqliteMain {
             var dbPtr = dbPtrPtr.get(C_POINTER, 0);
 
             // create a new table
-            var sql = session.allocateUtf8String(
+            var sql = arena.allocateUtf8String(
                 "CREATE TABLE EMPLOYEE ("  +
                 "  ID INT PRIMARY KEY NOT NULL," +
                 "  NAME TEXT NOT NULL,"    +
@@ -74,7 +74,7 @@ public class SqliteMain {
             }
 
             // insert two rows
-            sql = session.allocateUtf8String(
+            sql = arena.allocateUtf8String(
                 "INSERT INTO EMPLOYEE (ID,NAME,SALARY) " +
                     "VALUES (134, 'Xyz', 200000.0); " +
                 "INSERT INTO EMPLOYEE (ID,NAME,SALARY) " +
@@ -107,7 +107,7 @@ public class SqliteMain {
             }, session);
 
             // select query
-            sql = session.allocateUtf8String("SELECT * FROM EMPLOYEE");
+            sql = arena.allocateUtf8String("SELECT * FROM EMPLOYEE");
             rc = sqlite3_exec(dbPtr, sql, callback, NULL, errMsgPtrPtr);
 
             if (rc != 0) {

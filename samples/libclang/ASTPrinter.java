@@ -50,7 +50,7 @@ public class ASTPrinter {
         try (var session = MemorySession.openConfined()) {
             // parse the C header/source passed from the command line
             var index = clang_createIndex(0, 0);
-            var tu = clang_parseTranslationUnit(index, session.allocateUtf8String(args[0]),
+            var tu = clang_parseTranslationUnit(index, arena.allocateUtf8String(args[0]),
                     NULL, 0, NULL, 0, CXTranslationUnit_None());
             // array trick to update within lambda
             var level = new int[1];
