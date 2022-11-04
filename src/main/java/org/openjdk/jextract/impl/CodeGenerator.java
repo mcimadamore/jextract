@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022 Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,34 +22,26 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
 package org.openjdk.jextract.impl;
 
 import org.openjdk.jextract.Declaration;
+import java.util.List;
+import java.util.stream.Stream;
+import javax.tools.JavaFileObject;
 
-public class TypedefBuilder extends ClassSourceBuilder {
-    private final Declaration.Typedef typedefTree;
-    private final String superClass;
+public final class CodeGenerator {
+    private CodeGenerator() {}
 
-    public TypedefBuilder(JavaSourceBuilder enclosing,
-        Declaration.Typedef typedefTree, String name, String superClass) {
-        super(enclosing, Kind.CLASS, name);
-        this.typedefTree = typedefTree;
-        this.superClass = superClass;
-    }
-
-    @Override
-    String superClass() {
-        return superClass;
-    }
-
-    @Override
-    void classDeclBegin() {
-        emitDocComment(typedefTree);
-    }
-
-    @Override
-    JavaSourceBuilder classEnd() {
-        return super.classEnd();
+    public static JavaFileObject[] generate(Declaration.Scoped decl, String headerName,
+                    String targetPkg, IncludeHelper includeHelper,
+                    List<String> libNames) {
+        var nameMangler = new NameMangler(headerName);
+        var transformedDecl = Stream.of(decl).
+            map(new IncludeFilter(includeHelper)::transform).
+            map(new EnumConstantLifter()::transform).
+            map(new DuplicateFilter()::transform).
+            map(nameMangler::scan).
+            findFirst().get();
+        return OutputFactory.generateWrapped(transformedDecl, targetPkg, libNames, nameMangler);
     }
 }

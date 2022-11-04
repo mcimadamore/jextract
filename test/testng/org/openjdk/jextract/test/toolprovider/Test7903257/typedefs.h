@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,32 +21,7 @@
  * questions.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-#ifdef _WIN64
-#define EXPORT __declspec(dllexport)
-#else
-#define EXPORT
-#endif
-
-EXPORT int _global;
-
-EXPORT int _function(void);
-
-#define _constant 10
-
-typedef int _typedef;
-
-struct _struct { int x; };
-
-union _union { int y; };
-
-enum Color {
-    RED, GREEN, BLUE
-};
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+typedef unsigned long size_t;
+typedef int INT_32;
+typedef int* INT_PTR;
+typedef struct Foo* OPAQUE_PTR;

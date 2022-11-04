@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,21 +31,7 @@ extern "C" {
 #define EXPORT
 #endif
 
-EXPORT int _global;
-
-EXPORT int _function(void);
-
-#define _constant 10
-
-typedef int _typedef;
-
-struct _struct { int x; };
-
-union _union { int y; };
-
-enum Color {
-    RED, GREEN, BLUE
-};
+EXPORT void print_point(int x, int y);
 
 #ifdef __cplusplus
 }

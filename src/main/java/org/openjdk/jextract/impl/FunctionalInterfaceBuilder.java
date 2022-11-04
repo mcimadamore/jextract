@@ -28,6 +28,7 @@ package org.openjdk.jextract.impl;
 import java.lang.foreign.*;
 
 import org.openjdk.jextract.impl.ConstantBuilder.Constant;
+import org.openjdk.jextract.Type;
 
 import java.lang.invoke.MethodType;
 import java.util.List;
@@ -40,18 +41,25 @@ public class FunctionalInterfaceBuilder extends ClassSourceBuilder {
 
     private static final String MEMBER_MODS = "static";
 
+    private final Type.Function funcType;
     private final MethodType fiType;
     private final MethodType downcallType;
     private final FunctionDescriptor fiDesc;
     private final Optional<List<String>> parameterNames;
 
-    FunctionalInterfaceBuilder(JavaSourceBuilder enclosing, String className,
+    FunctionalInterfaceBuilder(JavaSourceBuilder enclosing, Type.Function funcType, String className,
                                FunctionDescriptor descriptor, Optional<List<String>> parameterNames) {
         super(enclosing, Kind.INTERFACE, className);
+        this.funcType = funcType;
         this.fiType = descriptor.toMethodType();
         this.downcallType = descriptor.toMethodType();
         this.fiDesc = descriptor;
         this.parameterNames = parameterNames;
+    }
+
+    @Override
+    void classDeclBegin() {
+        emitDocComment(funcType, className());
     }
 
     @Override
@@ -63,13 +71,12 @@ public class FunctionalInterfaceBuilder extends ClassSourceBuilder {
     }
 
     // private generation
-
     private String parameterName(int i) {
         String name = "";
         if (parameterNames.isPresent()) {
             name = parameterNames.get().get(i);
         }
-        return name.isEmpty()? "_x" + i : Utils.javaSafeIdentifier(name);
+        return name.isEmpty()? "_x" + i : name;
     }
 
     private void emitFunctionalInterfaceMethod() {
@@ -137,7 +144,7 @@ public class FunctionalInterfaceBuilder extends ClassSourceBuilder {
                     append("(" + downcallType.returnType().getName() + ")");
                 }
             }
-            append(mhConstant.accessExpression() + ".invokeExact((MemorySegment)symbol");
+            append(mhConstant.accessExpression() + ".invokeExact(symbol");
             if (fiType.parameterCount() > 0) {
                 String params = IntStream.range(0, fiType.parameterCount())
                         .mapToObj(i -> {

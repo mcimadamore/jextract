@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022 Oracle and/or its affiliates. All rights reserveold.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,34 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
 package org.openjdk.jextract.impl;
 
+import java.util.List;
 import org.openjdk.jextract.Declaration;
 
-public class TypedefBuilder extends ClassSourceBuilder {
-    private final Declaration.Typedef typedefTree;
-    private final String superClass;
+interface TreeTransformer {
+    Declaration.Scoped transform(Declaration.Scoped header);
 
-    public TypedefBuilder(JavaSourceBuilder enclosing,
-        Declaration.Typedef typedefTree, String name, String superClass) {
-        super(enclosing, Kind.CLASS, name);
-        this.typedefTree = typedefTree;
-        this.superClass = superClass;
+    default Declaration.Scoped createHeader(Declaration.Scoped old, List<Declaration> members) {
+        return Declaration.toplevel(old.pos(), members.toArray(new Declaration[0]));
     }
 
-    @Override
-    String superClass() {
-        return superClass;
-    }
-
-    @Override
-    void classDeclBegin() {
-        emitDocComment(typedefTree);
-    }
-
-    @Override
-    JavaSourceBuilder classEnd() {
-        return super.classEnd();
+    default Declaration.Scoped createScoped(Declaration.Scoped old, List<Declaration> members) {
+        var declsArray = members.toArray(new Declaration[0]);
+        return old.layout().isEmpty() ?
+            Declaration.scoped(old.kind(), old.pos(), old.name(), declsArray) :
+            Declaration.scoped(old.kind(), old.pos(), old.name(), old.layout().get(), declsArray);
     }
 }

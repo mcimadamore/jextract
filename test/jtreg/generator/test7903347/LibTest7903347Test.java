@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,33 +21,28 @@
  * questions.
  */
 
-package org.openjdk.jextract.impl;
+import org.testng.annotations.Test;
+import static test.jextract.test7903347.test7903347_h.*;
 
-import org.openjdk.jextract.Declaration;
-
-public class TypedefBuilder extends ClassSourceBuilder {
-    private final Declaration.Typedef typedefTree;
-    private final String superClass;
-
-    public TypedefBuilder(JavaSourceBuilder enclosing,
-        Declaration.Typedef typedefTree, String name, String superClass) {
-        super(enclosing, Kind.CLASS, name);
-        this.typedefTree = typedefTree;
-        this.superClass = superClass;
-    }
-
-    @Override
-    String superClass() {
-        return superClass;
-    }
-
-    @Override
-    void classDeclBegin() {
-        emitDocComment(typedefTree);
-    }
-
-    @Override
-    JavaSourceBuilder classEnd() {
-        return super.classEnd();
+/*
+ * @test id=classes
+ * @bug 7903347
+ * @summary add long name option for all single letter options and expand help on default values for various options
+ * @library /lib
+ * @run main/othervm JtregJextract --library Test7903347 -t test.jextract.test7903347 test7903347.h
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED LibTest7903347Test
+ */
+/*
+ * @test id=sources
+ * @bug 7903347
+ * @summary add long name option for all single letter options and expand help on default values for various options
+ * @library /lib
+ * @run main/othervm JtregJextractSources --library Test7903347 -t test.jextract.test7903347 test7903347.h
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED LibTest7903347Test
+ */
+public class LibTest7903347Test {
+    @Test
+    public void test() {
+        print_point(34, 56);
     }
 }
