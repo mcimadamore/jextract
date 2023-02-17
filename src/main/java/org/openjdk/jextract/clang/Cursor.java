@@ -186,12 +186,8 @@ public final class Cursor extends ClangDisposable.Owned {
         return new Cursor(referenced, owner);
     }
 
-    public void forEachStatic(Consumer<Cursor> action) {
-        CursorChildren.forEach(this, action);
-    }
-
     public void forEach(Consumer<Cursor> action) {
-        CursorVisitor cv = new CursorVisitor(action, owner);
+        CursorVisitor cv = new CursorVisitor(action);
         try (Arena arena = Arena.ofConfined()) {
             Index_h.clang_visitChildren(segment, CXCursorVisitor.allocate(cv, arena), MemorySegment.NULL);
             if (cv.pendingException != null) {
@@ -200,14 +196,12 @@ public final class Cursor extends ClangDisposable.Owned {
         }
     }
 
-    static class CursorVisitor implements CXCursorVisitor {
+    class CursorVisitor implements CXCursorVisitor {
         RuntimeException pendingException;
         final Consumer<Cursor> action;
-        final ClangDisposable owner;
 
-        CursorVisitor(Consumer<Cursor> action, ClangDisposable owner) {
+        CursorVisitor(Consumer<Cursor> action) {
             this.action = action;
-            this.owner = owner;
         }
 
         @Override
@@ -224,71 +218,6 @@ public final class Cursor extends ClangDisposable.Owned {
                 // if we fail, record the exception, and return false to stop the visit
                 pendingException = ex;
                 return Index_h.CXChildVisit_Break();
-            }
-        }
-    }
-
-    /**
-     * We run the visitor action inside the upcall, so that we do not have to worry about
-     * having to copy cursors into separate off-heap storage. To do this, we have to setup
-     * some context for the upcall, so that the upcall code can call the "correct" user-defined visitor action.
-     * Note: exceptions must be delayed until after the upcall has returned; this is necessary as upcalls
-     * cannot throw (if they do, they cause a JVM crash).
-     */
-    private static class CursorChildren {
-
-        static class Context {
-            private final Consumer<Cursor> action;
-            private final ClangDisposable owner;
-            private RuntimeException exception;
-
-            Context(Consumer<Cursor> action, ClangDisposable owner) {
-                this.action = action;
-                this.owner = owner;
-            }
-
-            boolean visit(MemorySegment segment) {
-                // Note: the session of this cursor is smaller than that of the translation unit
-                // this is because the cursor will be destroyed when the upcall ends. This means
-                // that the cursor passed by the visitor must NOT be leaked into a field and accessed
-                // at a later time (or the liveness check will fail with IllegalStateException).
-                try {
-                    // run the visitor action
-                    action.accept(new Cursor(segment, owner));
-                    return true;
-                } catch (RuntimeException ex) {
-                    // if we fail, record the exception, and return false to stop the visit
-                    exception = ex;
-                    return false;
-                }
-            }
-
-            void handleExceptions() {
-                if (exception != null) {
-                    throw exception;
-                }
-            }
-        }
-
-        static Context pendingContext = null;
-
-        private static final MemorySegment callback = CXCursorVisitor.allocate((c, p, d) -> {
-            if (pendingContext.visit(c)) {
-                return Index_h.CXChildVisit_Continue();
-            } else {
-                return Index_h.CXChildVisit_Break();
-            }
-        }, Arena.global());
-
-        synchronized static void forEach(Cursor c, Consumer<Cursor> op) {
-            // everything is confined, no need to synchronize
-            Context prevContext = pendingContext;
-            try {
-                pendingContext = new Context(op, c.owner);
-                Index_h.clang_visitChildren(c.segment, callback, MemorySegment.NULL);
-                pendingContext.handleExceptions();
-            } finally {
-                pendingContext = prevContext;
             }
         }
     }
