@@ -71,6 +71,9 @@ final class constants$13 {
         ),
         Constants$root.C_POINTER$LAYOUT
     );
+    static final MethodHandle CXCursorVisitor$UP_MH = RuntimeHelper.upcallHandle(
+            CXCursorVisitor.class, "apply", constants$13.CXCursorVisitor$FUNC
+    );
     static final MethodHandle CXCursorVisitor$MH = RuntimeHelper.downcallHandle(
         constants$13.CXCursorVisitor$FUNC
     );

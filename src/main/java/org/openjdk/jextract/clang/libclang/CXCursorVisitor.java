@@ -41,7 +41,7 @@ public interface CXCursorVisitor {
 
     int apply(java.lang.foreign.MemorySegment cursor, java.lang.foreign.MemorySegment parent, java.lang.foreign.MemorySegment client_data);
     static MemorySegment allocate(CXCursorVisitor fi, Arena scope) {
-        return RuntimeHelper.upcallStub(CXCursorVisitor.class, fi, constants$13.CXCursorVisitor$FUNC, scope);
+        return RuntimeHelper.upcallStub(constants$13.CXCursorVisitor$UP_MH, fi, constants$13.CXCursorVisitor$FUNC, scope);
     }
     static CXCursorVisitor ofAddress(MemorySegment addr, Arena arena) {
         MemorySegment symbol = addr.reinterpret(arena.scope(), null);
