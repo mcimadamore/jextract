@@ -186,8 +186,46 @@ public final class Cursor extends ClangDisposable.Owned {
         return new Cursor(referenced, owner);
     }
 
-    public void forEach(Consumer<Cursor> action) {
+    public void forEachStatic(Consumer<Cursor> action) {
         CursorChildren.forEach(this, action);
+    }
+
+    public void forEach(Consumer<Cursor> action) {
+        CursorVisitor cv = new CursorVisitor(action, owner);
+        try (Arena arena = Arena.ofConfined()) {
+            Index_h.clang_visitChildren(segment, CXCursorVisitor.allocate(cv, arena), MemorySegment.NULL);
+            if (cv.pendingException != null) {
+                throw cv.pendingException;
+            }
+        }
+    }
+
+    static class CursorVisitor implements CXCursorVisitor {
+        RuntimeException pendingException;
+        final Consumer<Cursor> action;
+        final ClangDisposable owner;
+
+        CursorVisitor(Consumer<Cursor> action, ClangDisposable owner) {
+            this.action = action;
+            this.owner = owner;
+        }
+
+        @Override
+        public int apply(MemorySegment cursor, MemorySegment parent, MemorySegment client_data) {
+            // Note: the session of this cursor is smaller than that of the translation unit
+            // this is because the cursor will be destroyed when the upcall ends. This means
+            // that the cursor passed by the visitor must NOT be leaked into a field and accessed
+            // at a later time (or the liveness check will fail with IllegalStateException).
+            try {
+                // run the visitor action
+                action.accept(new Cursor(cursor, owner));
+                return Index_h.CXChildVisit_Continue();
+            } catch (RuntimeException ex) {
+                // if we fail, record the exception, and return false to stop the visit
+                pendingException = ex;
+                return Index_h.CXChildVisit_Break();
+            }
+        }
     }
 
     /**
