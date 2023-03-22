@@ -87,7 +87,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'openjdk/jtreg'
-        ref: 'jtreg-6.2+1'
+        ref: 'jtreg-7.1.1+1-1'
         fetch-depth: 1
         path: deps/jtreg
 
@@ -95,7 +95,7 @@ jobs:
       shell: bash
       working-directory: ./deps/jtreg
       run: |
-        bash ./make/build.sh --jdk ${{ matrix.JAVA20_HOME }}
+        bash ./make/build.sh --jdk ${JAVA_HOME_11_X64}
         ls build/images/jtreg
 
     - name: 'Run tests'
