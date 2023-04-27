@@ -43,6 +43,7 @@ import org.openjdk.jextract.clang.CursorKind;
 import org.openjdk.jextract.clang.CursorLanguage;
 import org.openjdk.jextract.clang.LinkageKind;
 import org.openjdk.jextract.clang.SourceLocation;
+import org.openjdk.jextract.clang.libclang.Index_h;
 
 class TreeMaker {
     public TreeMaker() {}
@@ -53,6 +54,8 @@ class TreeMaker {
         typeMaker.resolveTypeReferences();
     }
 
+    Type.Declared parent;
+
     Map<String, List<Constable>> collectAttributes(Cursor c) {
         Map<String, List<Constable>> attributeMap = new HashMap<>();
         c.forEach(child -> {
@@ -61,6 +64,9 @@ class TreeMaker {
                 attrs.add(child.spelling());
             }
         });
+        if (!c.getMangling().equals(c.spelling())) {
+            attributeMap.put("LINK", List.of(c.getMangling()));
+        }
         return attributeMap;
     }
 
@@ -76,10 +82,10 @@ class TreeMaker {
          * set a C++ always. Because we want to allow C11's _Static_Assert,
          * we allow that exception here.
          */
-        if (lang != CursorLanguage.C && lang != CursorLanguage.Invalid &&
-                c.kind() != CursorKind.StaticAssert) {
-            throw new RuntimeException("Unsupported language: " + c.language());
-        }
+//        if (lang != CursorLanguage.C && lang != CursorLanguage.Invalid &&
+//                c.kind() != CursorKind.StaticAssert) {
+//            throw new RuntimeException("Unsupported language: " + c.language());
+//        }
 
         // If we can clearly determine internal linkage, then filter it.
         if (linkage == LinkageKind.Internal) {
@@ -101,6 +107,8 @@ class TreeMaker {
             case FieldDecl -> createVar(c, Declaration.Variable.Kind.FIELD);
             case ParmDecl -> createVar(c, Declaration.Variable.Kind.PARAMETER);
             case FunctionDecl -> createFunction(c);
+            case CXXMethod, CXXConstructor -> createMethod(c);
+            case ClassDecl -> createRecord(c, Declaration.Scoped.Kind.CLASS);
             case StructDecl -> createRecord(c, Declaration.Scoped.Kind.STRUCT);
             case UnionDecl -> createRecord(c, Declaration.Scoped.Kind.UNION);
             case TypedefDecl -> createTypedef(c);
@@ -189,6 +197,28 @@ class TreeMaker {
                 params.toArray(new Declaration.Variable[0]));
     }
 
+    public Declaration.Function createMethod(Cursor c) {
+        //checkCursor(c, CursorKind.CXXMethod);
+        if (parent == null) {
+            throw new AssertionError("Processing method outside a class");
+        }
+
+        List<Declaration.Variable> params = new ArrayList<>();
+        // add receiver param
+        Type recv = Type.pointer(parent);
+        params.add(Declaration.parameter(Position.NO_POSITION, "this$", recv));
+        for (int i = 0 ; i < c.numberOfArgs() ; i++) {
+            params.add((Declaration.Variable)createTree(c.getArgument(i)));
+        }
+        Type.Function type = (Type.Function)toType(c);
+        List<Type> newParams = new ArrayList<>(type.argumentTypes());
+        newParams.add(0, recv);
+        type = Type.function(type.varargs(), type.returnType(), newParams.toArray(Type[]::new));
+        Type funcType = canonicalType(type);
+        return Declaration.function(CursorPosition.of(c), c.spelling(), (Type.Function)funcType,
+                params.toArray(new Declaration.Variable[0]));
+    }
+
     public Declaration.Constant createMacro(Position pos, String name, Type type, Object value) {
         return Declaration.constant(pos, name, value, type);
     }
@@ -204,6 +234,7 @@ class TreeMaker {
     public Declaration.Scoped createRecord(Cursor c, Declaration.Scoped.Kind scopeKind) {
         Type.Declared t = (Type.Declared)RecordLayoutComputer.compute(typeMaker, 0, c.type(), c.type());
         List<Declaration> decls = filterNestedDeclarations(t.tree().members());
+        decls.addAll(memberFunctions(t, c));
         if (c.isDefinition()) {
             //just a declaration AND definition, we have a layout
             return Declaration.scoped(scopeKind, CursorPosition.of(c), c.spelling(),
@@ -214,6 +245,26 @@ class TreeMaker {
                 return null;
             }
             return Declaration.scoped(scopeKind, CursorPosition.of(c), c.spelling(), decls.toArray(new Declaration[0]));
+        }
+    }
+
+    public List<Declaration> memberFunctions(Type.Declared parent, Cursor c) {
+        List<Declaration> memberFunctions = new ArrayList<>();
+        Type.Declared prevParent = this.parent;
+        try {
+            this.parent = parent;
+            c.forEach(
+                    m -> {
+                        if (m.kind() == CursorKind.CXXMethod || m.kind() == CursorKind.CXXConstructor) {
+                            Declaration d = createTree(m);
+                            if (d != null) {
+                                memberFunctions.add(d);
+                            }
+                        }
+                    });
+            return memberFunctions;
+        } finally {
+            this.parent = prevParent;
         }
     }
 

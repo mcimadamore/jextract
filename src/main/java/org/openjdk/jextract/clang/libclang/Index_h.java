@@ -5870,6 +5870,26 @@ public class Index_h  {
     public static int CXResult_VisitBreak() {
         return (int)2L;
     }
+
+    final static StructLayout CURSOR = MemoryLayout.structLayout(
+            Constants$root.C_INT$LAYOUT.withName("kind"),
+            Constants$root.C_INT$LAYOUT.withName("xdata"),
+            MemoryLayout.sequenceLayout(3, C_POINTER).withName("data")
+    );
+
+    private final static MethodHandle clang_Cursor_getMangling$MH = RuntimeHelper.downcallHandle("clang_Cursor_getMangling",
+            FunctionDescriptor.of(org.openjdk.jextract.clang.libclang.CXString.$LAYOUT(), CURSOR));
+
+    //CINDEX_LINKAGE CXString 	clang_Cursor_getMangling (CXCursor)
+    public static MemorySegment clang_Cursor_getMangling(MemorySegment cursor, SegmentAllocator allocator) {
+        try {
+            return (MemorySegment)clang_Cursor_getMangling$MH.invokeExact(allocator, cursor);
+        } catch (Throwable ex) {
+            throw new AssertionError("Cannot get here!", ex);
+        }
+    }
+
+
 }
 
 

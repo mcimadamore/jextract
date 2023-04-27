@@ -267,7 +267,7 @@ public class OutputFactory implements Declaration.Visitor<Void, Declaration> {
              }
         }
 
-        toplevelBuilder.addFunction(funcTree, descriptor, nameMangler.getJavaName(parent, funcTree),
+        currentBuilder.addFunction(funcTree, descriptor, nameMangler.getJavaName(parent, funcTree),
             funcTree.parameters().
                 stream().
                 map(param -> nameMangler.getJavaName(null, param)).

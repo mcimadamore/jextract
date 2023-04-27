@@ -69,7 +69,7 @@ public final class JextractTool {
         MESSAGES_BUNDLE = ResourceBundle.getBundle(MESSAGES_RESOURCE, Locale.getDefault());
     }
 
-    public static final boolean DEBUG = Boolean.getBoolean("jextract.debug");
+    public static final boolean DEBUG = true;//Boolean.getBoolean("jextract.debug");
     public static final Optional<Path> PLATFORM_INCLUDE_PATH = inferPlatformIncludePath();
 
     // error codes

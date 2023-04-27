@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * MemoryLayout computer for C structs.
  */
-final class StructLayoutComputer extends RecordLayoutComputer {
+class StructLayoutComputer extends RecordLayoutComputer {
     private long offset;
     private long actualSize = 0L;
     // List to collect bitfield fields to process later, may be null

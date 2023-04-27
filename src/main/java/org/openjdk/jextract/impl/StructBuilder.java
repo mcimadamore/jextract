@@ -24,6 +24,7 @@
  */
 package org.openjdk.jextract.impl;
 
+import java.lang.constant.Constable;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemoryLayout;
@@ -31,9 +32,11 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.ValueLayout;
 import org.openjdk.jextract.Declaration;
+import org.openjdk.jextract.Declaration.Function;
 import org.openjdk.jextract.Type;
 import org.openjdk.jextract.impl.Constants.Constant;
 
+import java.lang.invoke.MethodType;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,8 +58,13 @@ class StructBuilder extends ClassSourceBuilder {
     private Constant layoutConstant;
 
     StructBuilder(JavaSourceBuilder enclosing, Declaration.Scoped structTree,
-        String name, GroupLayout structLayout) {
-        super(enclosing, Kind.CLASS, name);
+            String name, GroupLayout structLayout) {
+        this(enclosing, structTree, name, structLayout, Kind.CLASS);
+    }
+
+    StructBuilder(JavaSourceBuilder enclosing, Declaration.Scoped structTree,
+        String name, GroupLayout structLayout, Kind kind) {
+        super(enclosing, kind, name);
         this.structTree = structTree;
         this.structLayout = structLayout;
         this.structType = Type.declared(structTree);
@@ -127,6 +135,20 @@ class StructBuilder extends ClassSourceBuilder {
         } else {
             return new StructBuilder(this, tree, name, layout);
         }
+    }
+
+    @Override
+    public void addFunction(Function funcTree, FunctionDescriptor descriptor, String javaName, List<String> parameterNames) {
+        String nativeName = (String)funcTree.getAttribute("LINK").orElse(List.of(funcTree.name())).get(0);
+        boolean isVarargs = funcTree.type().varargs();
+
+        Constant mhConstant = constants().addDowncallMethodHandle(nativeName, descriptor, isVarargs)
+                .emitGetter(this, MEMBER_MODS, javaName, nativeName);
+        MethodType downcallType = descriptor.toMethodType();
+        boolean needsAllocator = descriptor.returnLayout().isPresent() &&
+                descriptor.returnLayout().get() instanceof GroupLayout;
+        emitDocComment(funcTree);
+        emitFunctionWrapper(MEMBER_MODS, mhConstant, javaName, nativeName, downcallType, needsAllocator, isVarargs, parameterNames);
     }
 
     @Override

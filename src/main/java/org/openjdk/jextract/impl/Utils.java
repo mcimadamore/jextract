@@ -123,7 +123,7 @@ class Utils {
 
     static boolean isStructOrUnion(Declaration.Scoped scoped) {
         return switch (scoped.kind()) {
-            case STRUCT, UNION -> true;
+            case STRUCT, UNION, CLASS -> true;
             default -> false;
         };
     }

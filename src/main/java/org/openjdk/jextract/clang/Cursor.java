@@ -255,6 +255,13 @@ public final class Cursor extends ClangDisposable.Owned {
         }
     }
 
+    public String getMangling() {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment manglingStr = Index_h.clang_Cursor_getMangling(segment, arena);
+            return LibClang.CXStrToString(manglingStr);
+        }
+    }
+
     public TranslationUnit getTranslationUnit() {
         return new TranslationUnit(Index_h.clang_Cursor_getTranslationUnit(segment));
     }

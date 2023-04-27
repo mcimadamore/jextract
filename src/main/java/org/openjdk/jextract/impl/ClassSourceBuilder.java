@@ -26,6 +26,9 @@ package org.openjdk.jextract.impl;
 
 import javax.tools.JavaFileObject;
 import java.lang.constant.ClassDesc;
+import java.lang.foreign.SegmentAllocator;
+import java.lang.invoke.MethodType;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openjdk.jextract.Declaration;
@@ -290,6 +293,73 @@ abstract class ClassSourceBuilder extends JavaSourceBuilder {
         indent();
         append("}\n");
         decrAlign();
+    }
+
+    // private generation
+
+    void emitFunctionWrapper(String mods, Constant mhConstant, String javaName, String nativeName, MethodType declType,
+                                     boolean needsAllocator, boolean isVarargs, List<String> parameterNames) {
+        incrAlign();
+        indent();
+        append(mods + " ");
+        if (needsAllocator) {
+            // needs allocator parameter
+            declType = declType.insertParameterTypes(0, SegmentAllocator.class);
+            parameterNames = new ArrayList<>(parameterNames);
+            parameterNames.add(0, "allocator");
+        }
+        List<String> pExprs = emitFunctionWrapperDecl(javaName, declType, isVarargs, parameterNames);
+        append(" {\n");
+        incrAlign();
+        indent();
+        append("var mh$ = ");
+        append(mhConstant.getterName(javaName));
+        append("();\n");
+        indent();
+        append("try {\n");
+        incrAlign();
+        indent();
+        if (!declType.returnType().equals(void.class)) {
+            append("return (" + declType.returnType().getName() + ")");
+        }
+        append("mh$.invokeExact(" + String.join(", ", pExprs) + ");\n");
+        decrAlign();
+        indent();
+        append("} catch (Throwable ex$) {\n");
+        incrAlign();
+        indent();
+        append("throw new AssertionError(\"should not reach here\", ex$);\n");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+        indent();
+        append("}\n");
+        decrAlign();
+    }
+
+    private List<String> emitFunctionWrapperDecl(String javaName, MethodType methodType, boolean isVarargs, List<String> paramNames) {
+        append(methodType.returnType().getSimpleName() + " " + javaName + "(");
+        String delim = "";
+        List<String> pExprs = new ArrayList<>();
+        final int numParams = paramNames.size();
+        for (int i = 0 ; i < numParams; i++) {
+            String pName = paramNames.get(i);
+            if (pName.isEmpty()) {
+                pName = "x" + i;
+            }
+            pExprs.add(pName);
+            Class<?> pType = methodType.parameterType(i);
+            append(delim + pType.getSimpleName() + " " + pName);
+            delim = ", ";
+        }
+        if (isVarargs) {
+            String lastArg = "x" + numParams;
+            append(delim + "Object... " + lastArg);
+            pExprs.add(lastArg);
+        }
+        append(")");
+        return pExprs;
     }
 
     @Override
