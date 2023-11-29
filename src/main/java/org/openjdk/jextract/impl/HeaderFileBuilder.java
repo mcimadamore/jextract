@@ -44,6 +44,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import static org.openjdk.jextract.impl.JavaStringProcessor.JAVA;
+
 /**
  * A helper class to generate header interface class in source form.
  * After aggregating various constituents of a .java source, build
@@ -151,10 +153,10 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 "downcallHandle";
         incrAlign();
         emitDocComment(decl);
-        appendLines(STR."""
+        appendLines(JAVA."""
             \{MEMBER_MODS} MethodHandle \{getterName}() {
                 class Holder {
-                    static final FunctionDescriptor DESC = \{descriptorString(2, descriptor)};
+                    static final FunctionDescriptor DESC = \{descriptorString(0, descriptor)};
 
                     static final MethodHandle MH = RuntimeHelper.\{factoryName}(\"\{nativeName}\", DESC);
                 }
