@@ -32,6 +32,7 @@ import org.openjdk.jextract.Declaration;
 import org.openjdk.jextract.Declaration.Bitfield;
 import org.openjdk.jextract.Position;
 import org.openjdk.jextract.Type;
+import org.openjdk.jextract.Type.Primitive.Kind;
 
 public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
 
@@ -135,7 +136,7 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
     private static Type.Visitor<String, Void> typeVisitor = new Type.Visitor<>() {
         @Override
         public String visitPrimitive(Type.Primitive t, Void aVoid) {
-            return t.kind().toString() + Type.layoutFor(t).map(l -> "(layout = " + l + ")").orElse("");
+            return t.kind().toString();// + Type.layoutFor(t).map(l -> "(layout = " + l + ")").orElse("");
         }
 
         @Override

@@ -417,7 +417,7 @@ public abstract class DeclarationImpl implements Declaration {
         return Optional.of(layout.withName(name));
     }
 
-    private static OptionalLong nextOffset(Declaration member) {
+    public static OptionalLong nextOffset(Declaration member) {
         if (member instanceof Variable) {
             return ClangOffsetOf.get(member);
         } else {
