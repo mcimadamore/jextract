@@ -358,9 +358,6 @@ public abstract class DeclarationImpl implements Declaration {
     // flexibility, as there is no specific order in which clients should obtain layouts for scoped declarations.
     private static Optional<MemoryLayout> recordLayout(Scoped scoped) {
         boolean isStruct = scoped.kind() == Kind.STRUCT;
-        String name = scoped.name().isEmpty() ?
-                "$anon$" + scoped.pos().line() + ":" + scoped.pos().col() :
-                scoped.name();
 
         long offset = 0;
         if (AnonymousStruct.isPresent(scoped)) {
@@ -414,6 +411,11 @@ public abstract class DeclarationImpl implements Declaration {
         GroupLayout layout = isStruct ?
                 MemoryLayout.structLayout(alignFields(memberLayouts, align)) :
                 MemoryLayout.unionLayout(alignFields(memberLayouts, align));
+
+        // the name is only useful for clients accessing the layout, jextract doesn't care about it
+        String name = scoped.name().isEmpty() ?
+                AnonymousStruct.anonName(scoped) :
+                scoped.name();
         return Optional.of(layout.withName(name));
     }
 
@@ -475,6 +477,10 @@ public abstract class DeclarationImpl implements Declaration {
 
         public static boolean isPresent(Scoped scoped) {
             return scoped.getAttribute(AnonymousStruct.class).isPresent();
+        }
+
+        public static String anonName(Scoped scoped) {
+            return "$anon$" + scoped.pos().line() + ":" + scoped.pos().col();
         }
     }
 
