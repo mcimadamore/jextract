@@ -472,15 +472,13 @@ public interface Declaration {
      * @return the layout for given declaration.
      */
     static Optional<MemoryLayout> layoutFor(Declaration d) {
-        Optional<MemoryLayout> res = switch (d) {
+        return switch (d) {
             case Scoped scoped -> DeclarationImpl.layoutFor(scoped);
             case Variable var -> Type.layoutFor(var.type());
             case Typedef typedef -> Type.layoutFor(typedef.type());
             case Constant constant -> Type.layoutFor(constant.type());
             default -> Optional.empty();
         };
-        res.get();
-        return res;
     }
 
     /**
@@ -489,7 +487,6 @@ public interface Declaration {
      * @return the function descriptor for given function declaration.
      */
     static Optional<FunctionDescriptor> descriptorFor(Function function) {
-        Type.descriptorFor(function.type()).get();
         return Type.descriptorFor(function.type());
     }
 

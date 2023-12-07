@@ -38,7 +38,6 @@ import org.openjdk.jextract.impl.DeclarationImpl.AnonymousStruct;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangSizeOf;
 import org.openjdk.jextract.impl.DeclarationImpl.JavaName;
 import org.openjdk.jextract.impl.DeclarationImpl.Skip;
-import org.openjdk.jextract.impl.TypeImpl.ErronrousTypeImpl;
 
 import java.io.PrintWriter;
 
@@ -50,6 +49,7 @@ import java.io.PrintWriter;
  * - functions/function pointer for which no descriptor exists
  * - variadic function pointers
  * - bitfields struct members
+ * - anonymous struct whose first (possibly nested) member has unknown offset
  */
 public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration> {
 
@@ -59,7 +59,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
         this.errStream = errStream;
     }
 
-    static String firstUnsupportedType(Type type, boolean allowVoid) {
+    static Type firstUnsupportedType(Type type, boolean allowVoid) {
         return type.accept(UNSUPPORTED_VISITOR, allowVoid);
     }
 
@@ -71,7 +71,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
     @Override
     public Void visitFunction(Function funcTree, Declaration parent) {
         //generate static wrapper for function
-        String unsupportedType = firstUnsupportedType(funcTree.type(), false);
+        Type unsupportedType = firstUnsupportedType(funcTree.type(), false);
         if (unsupportedType != null) {
             warnSkip(funcTree.name(), STR."unsupported type usage: \{unsupportedType}");
             Skip.with(funcTree);
@@ -97,7 +97,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
 
     @Override
     public Void visitVariable(Variable varTree, Declaration parent) {
-        String unsupportedType = firstUnsupportedType(varTree.type(), false);
+        Type unsupportedType = firstUnsupportedType(varTree.type(), false);
         String name = parent != null ? parent.name() + "." : "";
         name += varTree.name();
         if (unsupportedType != null) {
@@ -124,7 +124,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
 
     @Override
     public Void visitScoped(Scoped scoped, Declaration declaration) {
-        String unsupportedType = firstUnsupportedType(Type.declared(scoped), false);
+        Type unsupportedType = firstUnsupportedType(Type.declared(scoped), false);
         if (unsupportedType != null) {
             warnSkip(scoped.name(), STR."unsupported type usage: \{unsupportedType}");
             Skip.with(scoped);
@@ -138,7 +138,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
 
     @Override
     public Void visitTypedef(Typedef typedefTree, Declaration declaration) {
-        String unsupportedType = firstUnsupportedType(typedefTree.type(),false);
+        Type unsupportedType = firstUnsupportedType(typedefTree.type(),false);
         if (unsupportedType != null) {
             warnSkip(typedefTree.name(), STR."unsupported type usage: \{unsupportedType}");
             Skip.with(typedefTree);
@@ -168,7 +168,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
     }
 
     private boolean checkFunctionTypeSupported(Declaration decl, Type.Function func, String nameOfSkipped) {
-        String unsupportedType = firstUnsupportedType(func, false);
+        Type unsupportedType = firstUnsupportedType(func, false);
         if (unsupportedType != null) {
             warnSkip(nameOfSkipped, STR."unsupported type usage: \{unsupportedType}");
             return false;
@@ -182,26 +182,26 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
         return true;
     }
 
-    private static final Type.Visitor<String, Boolean> UNSUPPORTED_VISITOR = new Type.Visitor<>() {
+    private static final Type.Visitor<Type, Boolean> UNSUPPORTED_VISITOR = new Type.Visitor<>() {
         @Override
-        public String visitPrimitive(Type.Primitive t, Boolean allowVoid) {
+        public Type visitPrimitive(Type.Primitive t, Boolean allowVoid) {
             return switch (t.kind()) {
-                case Char16, Float128, HalfFloat, Int128, WChar -> t.kind().typeName();
-                case LongDouble -> TypeImpl.IS_WINDOWS ? null : t.kind().typeName();
-                case Void -> allowVoid ? null : t.kind().typeName();
+                case Char16, Float128, HalfFloat, Int128, WChar -> t;
+                case LongDouble -> TypeImpl.IS_WINDOWS ? null : t;
+                case Void -> allowVoid ? null : t;
                 default -> null;
             };
         }
 
         @Override
-        public String visitFunction(Type.Function t, Boolean allowVoid) {
+        public Type visitFunction(Type.Function t, Boolean allowVoid) {
             for (Type arg : t.argumentTypes()) {
-                String unsupported = firstUnsupportedType(arg, false);
+                Type unsupported = firstUnsupportedType(arg, false);
                 if (unsupported != null) {
                     return unsupported;
                 }
             }
-            String unsupported = firstUnsupportedType(t.returnType(), true);
+            Type unsupported = firstUnsupportedType(t.returnType(), true);
             if (unsupported != null) {
                 return unsupported;
             }
@@ -209,10 +209,10 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
         }
 
         @Override
-        public String visitDeclared(Type.Declared t, Boolean allowVoid) {
+        public Type visitDeclared(Type.Declared t, Boolean allowVoid) {
             if (t.tree().kind() == Kind.STRUCT || t.tree().kind() == Kind.UNION) {
                 if (!isValidStructOrUnion(t.tree())) {
-                    return t.tree().name();
+                    return t;
                 }
             }
             return null;
@@ -230,19 +230,19 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
         }
 
         @Override
-        public String visitDelegated(Type.Delegated t, Boolean allowVoid) {
+        public Type visitDelegated(Type.Delegated t, Boolean allowVoid) {
             return firstUnsupportedType(t.type(), true);
         }
 
         @Override
-        public String visitArray(Type.Array t, Boolean allowVoid) {
+        public Type visitArray(Type.Array t, Boolean allowVoid) {
             return firstUnsupportedType(t.elementType(), false);
         }
 
         @Override
-        public String visitType(Type t, Boolean allowVoid) {
+        public Type visitType(Type t, Boolean allowVoid) {
             return t.isErroneous() ?
-                    ((ErronrousTypeImpl)t).erroneousName : null;
+                    t : null;
         }
     };
 

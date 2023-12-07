@@ -382,7 +382,6 @@ public interface Type {
      * @return the layout for given type.
      */
     static Optional<MemoryLayout> layoutFor(Type t) {
-        TypeImpl.getLayout(t).get();
         return TypeImpl.getLayout(t);
     }
 
@@ -392,7 +391,6 @@ public interface Type {
      * @return the function descriptor for given function type.
      */
     static Optional<FunctionDescriptor> descriptorFor(Function function) {
-        TypeImpl.getDescriptor(function).get();
         return TypeImpl.getDescriptor(function);
     }
 
