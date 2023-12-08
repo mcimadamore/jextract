@@ -223,7 +223,7 @@ public class UnsupportedFilter implements Declaration.Visitor<Void, Declaration>
                 return false;
             }
             if (AnonymousStruct.isPresent(scoped) &&
-                    DeclarationImpl.nextOffset(scoped).isEmpty()) {
+                    DeclarationImpl.recordMemberOffset(scoped).isEmpty()) {
                 return false;
             }
             return true;

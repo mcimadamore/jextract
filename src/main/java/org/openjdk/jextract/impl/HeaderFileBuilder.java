@@ -219,10 +219,6 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             """);
     }
 
-    void emitPrimitiveTypedef(Type.Primitive primType, String name) {
-        emitRootPrimitiveTypedefLayout(name, primType, null);
-    }
-
     void emitPrimitiveTypedef(Declaration.Typedef typedefTree, Type.Primitive primType, String name) {
         emitPrimitiveTypedefLayout(name, primType, typedefTree);
     }
@@ -437,21 +433,6 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         String layout = LayoutUtils.layoutString(type, runtimeHelperName());
         appendLines(STR."""
         public static final \{Utils.valueLayoutCarrierFor(type).getSimpleName()} \{javaName} = \{layout};
-        """);
-        decrAlign();
-    }
-
-    /*
-     * @@@: This is needed for bootstrapping reasons
-     */
-    private void emitRootPrimitiveTypedefLayout(String javaName, Type type, Declaration declaration) {
-        incrAlign();
-        if (declaration != null) {
-            emitDocComment(declaration);
-        }
-        MemoryLayout layout = Type.layoutFor(type).get();
-        appendLines(STR."""
-        public static final \{Utils.valueLayoutCarrierFor(type).getSimpleName()} \{javaName} = \{layoutString(0, layout)};
         """);
         decrAlign();
     }
