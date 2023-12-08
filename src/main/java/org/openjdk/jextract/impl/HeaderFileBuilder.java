@@ -154,7 +154,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         appendLines(STR."""
             \{MEMBER_MODS} MethodHandle \{getterName}() {
                 class Holder {
-                    static final FunctionDescriptor DESC = \{LayoutUtils.functionDescriptorString(2, decl.type(), runtimeHelperName())};
+                    static final FunctionDescriptor DESC = \{functionDescriptorString(2, decl.type())};
 
                     static final MethodHandle MH = Linker.nativeLinker().downcallHandle(
                             \{runtimeHelperName()}.findOrThrow("\{nativeName}"),
@@ -185,7 +185,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             emitDocComment(decl);
             appendLines(STR."""
                 public static \{invokerName} \{invokerFactoryName}(MemoryLayout... layouts) {
-                    FunctionDescriptor baseDesc$ = \{LayoutUtils.functionDescriptorString(2, decl.type(), runtimeHelperName())};
+                    FunctionDescriptor baseDesc$ = \{functionDescriptorString(2, decl.type())};
                     var mh$ = \{runtimeHelperName()}.downcallHandleVariadic("\{nativeName}", baseDesc$, layouts);
                     return (\{paramExprs}) -> {
                         try {
@@ -344,9 +344,8 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
     private String emitVarLayout(Type varType, String javaName) {
         String mangledName = mangleName(javaName, MemoryLayout.class);
-        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
-            private static final MemoryLayout \{mangledName} = \{layout};
+            private static final MemoryLayout \{mangledName} = \{layoutString(varType)};
 
             \{MEMBER_MODS} MemoryLayout \{mangledName}() {
                 return \{mangledName};
@@ -430,9 +429,8 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         if (declaration != null) {
             emitDocComment(declaration);
         }
-        String layout = LayoutUtils.layoutString(type, runtimeHelperName());
         appendLines(STR."""
-        public static final \{Utils.valueLayoutCarrierFor(type).getSimpleName()} \{javaName} = \{layout};
+        public static final \{Utils.valueLayoutCarrierFor(type).getSimpleName()} \{javaName} = \{layoutString(type)};
         """);
         decrAlign();
     }

@@ -29,15 +29,22 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.ValueLayout;
 import org.openjdk.jextract.Declaration;
+import org.openjdk.jextract.Declaration.Scoped;
+import org.openjdk.jextract.Declaration.Variable;
 import org.openjdk.jextract.Type;
+import org.openjdk.jextract.Type.Declared;
 import org.openjdk.jextract.impl.DeclarationImpl.AnonymousStruct;
+import org.openjdk.jextract.impl.DeclarationImpl.ClangAlignOf;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangOffsetOf;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangSizeOf;
 import org.openjdk.jextract.impl.DeclarationImpl.JavaName;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This class generates static utilities class for C structs, unions.
@@ -161,10 +168,9 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     private void emitFieldGetter(String javaName, Type varType, long offset) {
         String seg = safeParameterName("seg");
         Class<?> type = Utils.carrierFor(varType);
-        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static \{type.getSimpleName()} \{javaName}$get(MemorySegment \{seg}) {
-                return \{seg}.get(\{layout}, \{offset});
+                return \{seg}.get(\{layoutString(varType)}, \{offset});
             }
             """);
     }
@@ -173,10 +179,9 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         String seg = safeParameterName("seg");
         String x = safeParameterName("x");
         Class<?> type = Utils.carrierFor(varType);
-        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static void \{javaName}$set(MemorySegment \{seg}, \{type.getSimpleName()} \{x}) {
-                \{seg}.set(\{layout}, \{offset}, \{x});
+                \{seg}.set(\{layoutString(varType)}, \{offset}, \{x});
             }
             """);
     }
@@ -222,10 +227,9 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         String index = safeParameterName("index");
         String seg = safeParameterName("seg");
         Class<?> type = Utils.carrierFor(varType);
-        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static \{type.getSimpleName()} \{javaName}$get(MemorySegment \{seg}, long \{index}) {
-                return \{seg}.get(\{layout}, \{offset} + (\{index} * sizeof()));
+                return \{seg}.get(\{layoutString(varType)}, \{offset} + (\{index} * sizeof()));
             }
             """);
     }
@@ -235,21 +239,89 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         String seg = safeParameterName("seg");
         String x = safeParameterName("x");
         Class<?> type = Utils.carrierFor(varType);
-        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static void \{javaName}$set(MemorySegment \{seg}, long \{index}, \{type.getSimpleName()} \{x}) {
-                \{seg}.set(\{layout}, \{offset} + (\{index} * sizeof()), \{x});
+                \{seg}.set(\{layoutString(varType)}, \{offset} + (\{index} * sizeof()), \{x});
             }
             """);
     }
 
     private void emitLayoutDecl() {
         appendIndentedLines(STR."""
-            private static final MemoryLayout $LAYOUT = \{LayoutUtils.structOrUnionLayoutString(structType, runtimeHelperName())};
+            private static final MemoryLayout $LAYOUT = \{structOrUnionLayoutString(structType)};
 
             public static final MemoryLayout $LAYOUT() {
                 return $LAYOUT;
             }
             """);
+    }
+
+    private String structOrUnionLayoutString(Type type) {
+        return switch (type) {
+            case Declared d when Utils.isStructOrUnion(type) -> structOrUnionLayoutString(0, d.tree());
+            default -> throw new UnsupportedOperationException(type.toString());
+        };
+    }
+
+    private String structOrUnionLayoutString(long base, Declaration.Scoped scoped) {
+        List<String> memberLayouts = new ArrayList<>();
+
+        boolean isStruct = scoped.kind() == Scoped.Kind.STRUCT;
+
+        long align = ClangAlignOf.getOrThrow(scoped) / 8;
+        long offset = base;
+
+        long size = 0L; // bits
+        for (Declaration member : scoped.members()) {
+            if (member instanceof Scoped nested && nested.kind() == Scoped.Kind.BITFIELDS) {
+                // skip
+            } else {
+                long nextOffset = DeclarationImpl.recordMemberOffset(member).getAsLong();
+                long delta = nextOffset - offset;
+                if (delta > 0) {
+                    memberLayouts.add(paddingLayoutString(delta / 8));
+                    offset += delta;
+                    if (isStruct) {
+                        size += delta;
+                    }
+                }
+                String memberLayout;
+                if (member instanceof Variable var) {
+                    memberLayout = layoutString(var.type(), align);
+                    memberLayout = STR."\{memberLayout}.withName(\"\{member.name()}\")";
+                } else {
+                    // anon struct
+                    memberLayout = structOrUnionLayoutString(offset, (Scoped)member);
+                }
+                if ((ClangAlignOf.getOrThrow(member) / 8) > align) {
+                    memberLayout = STR."\{memberLayout}.withByteAlignment(\{align})";
+                }
+                memberLayouts.add(memberLayout);
+                // update offset and size
+                long fieldSize = ClangSizeOf.getOrThrow(member);
+                if (isStruct) {
+                    offset += fieldSize;
+                    size += fieldSize;
+                } else {
+                    size = Math.max(size, ClangSizeOf.getOrThrow(member));
+                }
+            }
+        }
+        long expectedSize = ClangSizeOf.getOrThrow(scoped);
+        if (size != expectedSize) {
+            memberLayouts.add(paddingLayoutString((expectedSize - size) / 8));
+        }
+
+        String indentNewLine = STR."\n\{indentString(1)}";
+        String prefix = isStruct ? "MemoryLayout.structLayout(" :
+                "MemoryLayout.unionLayout(";
+        String layoutString = memberLayouts.stream()
+                .collect(Collectors.joining("," + indentNewLine, prefix + indentNewLine, "\n)"));
+
+        // the name is only useful for clients accessing the layout, jextract doesn't care about it
+        String name = scoped.name().isEmpty() ?
+                AnonymousStruct.anonName(scoped) :
+                scoped.name();
+        return STR."\{layoutString}.withName(\"\{name}\")";
     }
 }
