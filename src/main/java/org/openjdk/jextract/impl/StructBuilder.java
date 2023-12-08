@@ -244,9 +244,8 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     }
 
     private void emitLayoutDecl() {
-        MemoryLayout structLayout = Type.layoutFor(structType).get();
         appendIndentedLines(STR."""
-            private static final MemoryLayout $LAYOUT = \{layoutString(0, structLayout)};
+            private static final MemoryLayout $LAYOUT = \{LayoutUtils.structOrUnionLayoutString(structType, runtimeHelperName())};
 
             public static final MemoryLayout $LAYOUT() {
                 return $LAYOUT;
