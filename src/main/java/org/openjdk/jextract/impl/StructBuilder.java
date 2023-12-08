@@ -161,10 +161,10 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     private void emitFieldGetter(String javaName, Type varType, long offset) {
         String seg = safeParameterName("seg");
         Class<?> type = Utils.carrierFor(varType);
-        MemoryLayout layout = Type.layoutFor(varType).get();
+        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static \{type.getSimpleName()} \{javaName}$get(MemorySegment \{seg}) {
-                return \{seg}.get(\{layoutString(1, layout)}, \{offset});
+                return \{seg}.get(\{layout}, \{offset});
             }
             """);
     }
@@ -173,10 +173,10 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         String seg = safeParameterName("seg");
         String x = safeParameterName("x");
         Class<?> type = Utils.carrierFor(varType);
-        MemoryLayout layout = Type.layoutFor(varType).get();
+        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static void \{javaName}$set(MemorySegment \{seg}, \{type.getSimpleName()} \{x}) {
-                \{seg}.set(\{layoutString(1, layout)}, \{offset}, \{x});
+                \{seg}.set(\{layout}, \{offset}, \{x});
             }
             """);
     }
@@ -222,10 +222,10 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         String index = safeParameterName("index");
         String seg = safeParameterName("seg");
         Class<?> type = Utils.carrierFor(varType);
-        MemoryLayout layout = Type.layoutFor(varType).get();
+        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static \{type.getSimpleName()} \{javaName}$get(MemorySegment \{seg}, long \{index}) {
-                return \{seg}.get(\{layoutString(1, layout)}, \{offset} + (\{index} * sizeof()));
+                return \{seg}.get(\{layout}, \{offset} + (\{index} * sizeof()));
             }
             """);
     }
@@ -235,10 +235,10 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         String seg = safeParameterName("seg");
         String x = safeParameterName("x");
         Class<?> type = Utils.carrierFor(varType);
-        MemoryLayout layout = Type.layoutFor(varType).get();
+        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
             public static void \{javaName}$set(MemorySegment \{seg}, long \{index}, \{type.getSimpleName()} \{x}) {
-                \{seg}.set(\{layoutString(1, layout)}, \{offset} + (\{index} * sizeof()), \{x});
+                \{seg}.set(\{layout}, \{offset} + (\{index} * sizeof()), \{x});
             }
             """);
     }

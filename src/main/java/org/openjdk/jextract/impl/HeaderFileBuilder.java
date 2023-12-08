@@ -77,16 +77,15 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         }
     }
 
-    public void addFunction(Declaration.Function funcTree, FunctionDescriptor descriptor) {
+    public void addFunction(Declaration.Function funcTree) {
         String nativeName = funcTree.name();
         boolean isVarargs = funcTree.type().varargs();
-        boolean needsAllocator = descriptor.returnLayout().isPresent() &&
-                descriptor.returnLayout().get() instanceof GroupLayout;
+        boolean needsAllocator = Utils.isStructOrUnion(funcTree.type().returnType());
         List<String> parameterNames = funcTree.parameters().
                 stream().
                 map(JavaName::getOrThrow).
                 toList();
-        emitFunctionWrapper(JavaName.getOrThrow(funcTree), nativeName, descriptor, needsAllocator, isVarargs, parameterNames, funcTree);
+        emitFunctionWrapper(JavaName.getOrThrow(funcTree), nativeName, needsAllocator, isVarargs, parameterNames, funcTree);
     }
 
     public void addConstant(Declaration.Constant constantTree) {
@@ -135,9 +134,9 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         return sb.toString();
     }
 
-    private void emitFunctionWrapper(String javaName, String nativeName, FunctionDescriptor descriptor, boolean needsAllocator,
-                                     boolean isVarArg, List<String> parameterNames, Declaration decl) {
-        MethodType declType = descriptor.toMethodType();
+    private void emitFunctionWrapper(String javaName, String nativeName, boolean needsAllocator,
+                                     boolean isVarArg, List<String> parameterNames, Declaration.Function decl) {
+        MethodType declType = Utils.methodTypeFor(decl.type());
         List<String> finalParamNames = finalizeParameterNames(parameterNames, needsAllocator, isVarArg);
         if (needsAllocator) {
             declType = declType.insertParameterTypes(0, SegmentAllocator.class);
@@ -155,7 +154,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         appendLines(STR."""
             \{MEMBER_MODS} MethodHandle \{getterName}() {
                 class Holder {
-                    static final FunctionDescriptor DESC = \{descriptorString(2, descriptor)};
+                    static final FunctionDescriptor DESC = \{LayoutUtils.functionDescriptorString(2, decl.type(), runtimeHelperName())};
 
                     static final MethodHandle MH = Linker.nativeLinker().downcallHandle(
                             \{runtimeHelperName()}.findOrThrow("\{nativeName}"),
@@ -186,7 +185,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             emitDocComment(decl);
             appendLines(STR."""
                 public static \{invokerName} \{invokerFactoryName}(MemoryLayout... layouts) {
-                    FunctionDescriptor baseDesc$ = \{descriptorString(2, descriptor)};
+                    FunctionDescriptor baseDesc$ = \{LayoutUtils.functionDescriptorString(2, decl.type(), runtimeHelperName())};
                     var mh$ = \{runtimeHelperName()}.downcallHandleVariadic("\{nativeName}", baseDesc$, layouts);
                     return (\{paramExprs}) -> {
                         try {
@@ -221,7 +220,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
     }
 
     void emitPrimitiveTypedef(Type.Primitive primType, String name) {
-        emitPrimitiveTypedef(null, primType, name);
+        emitRootPrimitiveTypedefLayout(name, primType, null);
     }
 
     void emitPrimitiveTypedef(Declaration.Typedef typedefTree, Type.Primitive primType, String name) {
@@ -349,9 +348,9 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
     private String emitVarLayout(Type varType, String javaName) {
         String mangledName = mangleName(javaName, MemoryLayout.class);
-        MemoryLayout layout = Type.layoutFor(varType).get();
+        String layout = LayoutUtils.layoutString(varType, runtimeHelperName());
         appendIndentedLines(STR."""
-            private static final MemoryLayout \{mangledName} = \{layoutString(0, layout)};
+            private static final MemoryLayout \{mangledName} = \{layout};
 
             \{MEMBER_MODS} MemoryLayout \{mangledName}() {
                 return \{mangledName};
@@ -431,6 +430,21 @@ class HeaderFileBuilder extends ClassSourceBuilder {
     }
 
     private void emitPrimitiveTypedefLayout(String javaName, Type type, Declaration declaration) {
+        incrAlign();
+        if (declaration != null) {
+            emitDocComment(declaration);
+        }
+        String layout = LayoutUtils.layoutString(type, runtimeHelperName());
+        appendLines(STR."""
+        public static final \{Utils.valueLayoutCarrierFor(type).getSimpleName()} \{javaName} = \{layout};
+        """);
+        decrAlign();
+    }
+
+    /*
+     * @@@: This is needed for bootstrapping reasons
+     */
+    private void emitRootPrimitiveTypedefLayout(String javaName, Type type, Declaration declaration) {
         incrAlign();
         if (declaration != null) {
             emitDocComment(declaration);
