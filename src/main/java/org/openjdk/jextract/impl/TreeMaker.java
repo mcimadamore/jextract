@@ -25,8 +25,6 @@
  */
 package org.openjdk.jextract.impl;
 
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +55,7 @@ import org.openjdk.jextract.impl.DeclarationImpl.AnonymousStruct;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangAlignOf;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangOffsetOf;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangSizeOf;
+import org.openjdk.jextract.impl.DeclarationImpl.NestedTypeDeclarations;
 
 /**
  * This class turns a clang cursor into a jextract declaration. All declarations are de-duplicated,
@@ -221,8 +220,8 @@ class TreeMaker {
         }
         Type type = toType(c);
         Type funcType = canonicalType(type);
-        return Declaration.function(CursorPosition.of(c), c.spelling(), (Type.Function)funcType,
-                params.toArray(new Declaration.Variable[0]));
+        return addNestedDeclarations(Declaration.function(CursorPosition.of(c), c.spelling(), (Type.Function)funcType,
+                params.toArray(new Declaration.Variable[0])), c);
     }
 
     public Declaration.Constant createMacro(Position pos, String name, Type type, Object value) {
@@ -411,7 +410,7 @@ class TreeMaker {
                 }
             }
         }
-        return Declaration.typedef(CursorPosition.of(c), c.spelling(), canonicalType);
+        return addNestedDeclarations(Declaration.typedef(CursorPosition.of(c), c.spelling(), canonicalType), c);
     }
 
     private Type canonicalType(Type t) {
@@ -427,7 +426,20 @@ class TreeMaker {
         if (c.isBitField()) throw new AssertionError("Cannot get here!");
         checkCursorAny(c, CursorKind.VarDecl, CursorKind.FieldDecl, CursorKind.ParmDecl);
         Type type = toType(c);
-        return Declaration.var(kind, CursorPosition.of(c), c.spelling(), type);
+        return addNestedDeclarations(Declaration.var(kind, CursorPosition.of(c), c.spelling(), type), c);
+    }
+
+    private <D extends Declaration> D addNestedDeclarations(D d, Cursor c) {
+        List<Declaration> nestedDeclarations = new ArrayList<>();
+        c.forEach(m -> nestedDeclarations.add(createTree(m)));
+        List<Type.Declared> nestedTypeDeclarations = nestedDeclarations.stream()
+                .filter(m -> m instanceof Scoped)
+                .map(s -> Type.declared((Scoped)s))
+                .toList();
+        if (!nestedTypeDeclarations.isEmpty()) {
+            NestedTypeDeclarations.with(d, nestedTypeDeclarations);
+        }
+        return d;
     }
 
     Type toType(Cursor c) {
