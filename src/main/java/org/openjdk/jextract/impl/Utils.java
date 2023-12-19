@@ -34,7 +34,7 @@ import org.openjdk.jextract.Type.Delegated.Kind;
 import org.openjdk.jextract.Type.Function;
 import org.openjdk.jextract.clang.Cursor;
 import org.openjdk.jextract.clang.CursorKind;
-import org.openjdk.jextract.impl.DeclarationImpl.NestedTypeDeclarations;
+import org.openjdk.jextract.impl.DeclarationImpl.NestedTypes;
 //import org.openjdk.jextract.impl.DeclarationImpl.NestedDecl;
 
 import javax.tools.JavaFileObject;
@@ -112,7 +112,7 @@ class Utils {
     }
 
     static void forEachNested(Declaration declaration, Consumer<Declaration> nestedDeclAction) {
-        NestedTypeDeclarations.get(declaration).ifPresent(decls ->
+        NestedTypes.get(declaration).ifPresent(decls ->
             decls.stream().map(Type.Declared::tree).forEach(nestedDeclAction));
     }
 

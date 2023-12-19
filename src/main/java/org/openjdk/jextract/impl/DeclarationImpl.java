@@ -464,26 +464,17 @@ public abstract class DeclarationImpl implements Declaration {
     }
 
     /**
-     * An attribute to mark nested struct/union/enum declarations.
+     * An attribute to attach nested struct/union/enum declarations to other declarations.
      */
-    record NestedTypeDeclarations(List<Type.Declared> declarations) {
+    record NestedTypes(List<Type.Declared> nestedTypes) {
 
-        public static void with(Declaration declaration, List<Type.Declared> nestedDeclarations) {
-            declaration.addAttribute(new NestedTypeDeclarations(nestedDeclarations));
-        }
-
-        public static boolean isPresent(Declaration declaration) {
-            return declaration.getAttribute(NestedTypeDeclarations.class).isPresent();
+        public static void with(Declaration declaration, List<Type.Declared> nestedTypes) {
+            declaration.addAttribute(new NestedTypes(nestedTypes));
         }
 
         public static Optional<List<Type.Declared>> get(Declaration declaration) {
-            return declaration.getAttribute(NestedTypeDeclarations.class)
-                    .stream().map(NestedTypeDeclarations::declarations).findFirst();
-        }
-
-        public static List<Type.Declared> getOrThrow(Declaration declaration) {
-            return declaration.getAttribute(NestedTypeDeclarations.class)
-                    .stream().map(NestedTypeDeclarations::declarations).findFirst().get();
+            return declaration.getAttribute(NestedTypes.class)
+                    .stream().map(NestedTypes::nestedTypes).findFirst();
         }
     }
 }

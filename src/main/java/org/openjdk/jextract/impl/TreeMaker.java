@@ -55,7 +55,7 @@ import org.openjdk.jextract.impl.DeclarationImpl.AnonymousStruct;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangAlignOf;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangOffsetOf;
 import org.openjdk.jextract.impl.DeclarationImpl.ClangSizeOf;
-import org.openjdk.jextract.impl.DeclarationImpl.NestedTypeDeclarations;
+import org.openjdk.jextract.impl.DeclarationImpl.NestedTypes;
 
 /**
  * This class turns a clang cursor into a jextract declaration. All declarations are de-duplicated,
@@ -220,7 +220,7 @@ class TreeMaker {
         }
         Type type = toType(c);
         Type funcType = canonicalType(type);
-        return addNestedDeclarations(Declaration.function(CursorPosition.of(c), c.spelling(), (Type.Function)funcType,
+        return withNestedTypes(Declaration.function(CursorPosition.of(c), c.spelling(), (Type.Function)funcType,
                 params.toArray(new Declaration.Variable[0])), c);
     }
 
@@ -410,7 +410,7 @@ class TreeMaker {
                 }
             }
         }
-        return addNestedDeclarations(Declaration.typedef(CursorPosition.of(c), c.spelling(), canonicalType), c);
+        return withNestedTypes(Declaration.typedef(CursorPosition.of(c), c.spelling(), canonicalType), c);
     }
 
     private Type canonicalType(Type t) {
@@ -426,18 +426,22 @@ class TreeMaker {
         if (c.isBitField()) throw new AssertionError("Cannot get here!");
         checkCursorAny(c, CursorKind.VarDecl, CursorKind.FieldDecl, CursorKind.ParmDecl);
         Type type = toType(c);
-        return addNestedDeclarations(Declaration.var(kind, CursorPosition.of(c), c.spelling(), type), c);
+        return withNestedTypes(Declaration.var(kind, CursorPosition.of(c), c.spelling(), type), c);
     }
 
-    private <D extends Declaration> D addNestedDeclarations(D d, Cursor c) {
-        List<Declaration> nestedDeclarations = new ArrayList<>();
-        c.forEach(m -> nestedDeclarations.add(createTree(m)));
-        List<Type.Declared> nestedTypeDeclarations = nestedDeclarations.stream()
+    private <D extends Declaration> D withNestedTypes(D d, Cursor c) {
+        List<Declaration> nestedDefinitions = new ArrayList<>();
+        c.forEach(m -> {
+            if (m.isDefinition()) {
+                nestedDefinitions.add(createTree(m));
+            }
+        });
+        List<Type.Declared> nestedTypes = nestedDefinitions.stream()
                 .filter(m -> m instanceof Scoped)
                 .map(s -> Type.declared((Scoped)s))
                 .toList();
-        if (!nestedTypeDeclarations.isEmpty()) {
-            NestedTypeDeclarations.with(d, nestedTypeDeclarations);
+        if (!nestedTypes.isEmpty()) {
+            NestedTypes.with(d, nestedTypes);
         }
         return d;
     }

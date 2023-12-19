@@ -1,4 +1,4 @@
-package generator.outOfOrder;/*
+/*
  * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -22,23 +22,25 @@ package generator.outOfOrder;/*
  */
 
 import org.testng.annotations.Test;
-import test.jextract.out.typedef.*;
+import test.jextract.out.struct.*;
 
 import java.lang.foreign.GroupLayout;
+
+import static org.testng.Assert.*;
 
 /*
  * @test id=classes
  * @library /lib
- * @run main/othervm JtregJextract -t test.jextract.out.typedef out_of_order_typedef.h
- * @build TestOutOfOrderTypedef
- * @run testng/othervm --enable-native-access=ALL-UNNAMED TestOutOfOrderTypedef
+ * @run main/othervm JtregJextract -t test.jextract.out.struct out_of_order_struct.h
+ * @build TestOutOfOrderStruct
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED TestOutOfOrderStruct
  */
 /*
  * @test id=sources
  * @library /lib
- * @run main/othervm JtregJextractSources -t test.jextract.out.typedef out_of_order_typedef.h
- * @build TestOutOfOrderTypedef
- * @run testng/othervm --enable-native-access=ALL-UNNAMED TestOutOfOrderTypedef
+ * @run main/othervm JtregJextractSources -t test.jextract.out.struct out_of_order_struct.h
+ * @build TestOutOfOrderStruct
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED TestOutOfOrderStruct
  */
 public class TestOutOfOrderStruct {
 
