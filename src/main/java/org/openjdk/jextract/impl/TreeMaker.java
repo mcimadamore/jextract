@@ -429,6 +429,11 @@ class TreeMaker {
         return withNestedTypes(Declaration.var(kind, CursorPosition.of(c), c.spelling(), type), c);
     }
 
+    /*
+     * Some declarations (global vars, struct/union fields, function parameter/return types might contain
+     * inline nested struct/union/enum definitions. This method collects such definitions and
+     * attaches them to the original declaration, using an attribute.
+     */
     private <D extends Declaration> D withNestedTypes(D d, Cursor c) {
         List<Declaration> nestedDefinitions = new ArrayList<>();
         c.forEach(m -> {
