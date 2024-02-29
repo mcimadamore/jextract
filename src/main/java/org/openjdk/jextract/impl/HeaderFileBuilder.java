@@ -142,7 +142,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
         String retType = declType.returnType().getSimpleName();
         boolean isVoid = declType.returnType().equals(void.class);
-        String returnNoCast = isVoid ? "" : STR."return ";
+        String returnNoCast = isVoid ? "" : "return ";
         String returnWithCast = isVoid ? "" : STR."\{returnNoCast}(\{retType})";
         String paramList = String.join(", ", finalParamNames);
         String traceArgList = paramList.isEmpty() ?
@@ -151,7 +151,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         if (!isVarArg) {
             String holderClass = newHolderClassName(javaName);
-            appendLines(STR."""
+            appendLines("""
 
                 private static class \{holderClass} {
                     public static final FunctionDescriptor DESC = \{functionDescriptorString(1, decl.type())};
@@ -163,20 +163,20 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 """);
             appendBlankLine();
             emitDocComment(decl, "Function descriptor for:");
-            appendLines(STR."""
+            appendLines("""
                 public static FunctionDescriptor \{javaName}$descriptor() {
                     return \{holderClass}.DESC;
                 }
                 """);
             appendBlankLine();
             emitDocComment(decl, "Downcall method handle for:");
-            appendLines(STR."""
+            appendLines("""
                 public static MethodHandle \{javaName}$handle() {
                     return \{holderClass}.HANDLE;
                 }
                 """);
             emitDocComment(decl);
-            appendLines(STR."""
+            appendLines("""
             public static \{retType} \{javaName}(\{paramExprs(declType, finalParamNames, isVarArg)}) {
                 var mh$ = \{holderClass}.HANDLE;
                 try {
@@ -194,7 +194,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             String paramExprs = paramExprs(declType, finalParamNames, isVarArg);
             appendBlankLine();
             emitDocComment(decl, "Variadic invoker class for:");
-            appendLines(STR."""
+            appendLines("""
                 public static class \{invokerClassName} {
                     private static final FunctionDescriptor BASE_DESC = \{functionDescriptorString(2, decl.type())};
                     private static final MemorySegment ADDR = \{runtimeHelperName()}.findOrThrow("\{nativeName}");
@@ -212,7 +212,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             incrAlign();
             appendBlankLine();
             emitDocComment(decl, "Variadic invoker factory for:");
-            appendLines(STR."""
+            appendLines("""
                 public static \{invokerClassName} makeInvoker(MemoryLayout... layouts) {
                     FunctionDescriptor desc$ = BASE_DESC.appendArgumentLayouts(layouts);
                     Linker.Option fva$ = Linker.Option.firstVariadicArg(BASE_DESC.argumentLayouts().size());
@@ -222,7 +222,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 }
                 """);
             decrAlign();
-            appendLines(STR."""
+            appendLines("""
 
                     /**
                      * {@return the specialized method handle}
@@ -276,7 +276,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             incrAlign();
             for (Options.Library lib : libraries) {
                 String method = lib.specKind() == Options.Library.SpecKind.PATH ? "load" : "loadLibrary";
-                appendIndentedLines(STR."System.\{method}(\"\{lib.toQuotedName()}\");");
+                appendIndentedLines("System.\{method}(\"\{lib.toQuotedName()}\");");
             }
             decrAlign();
             appendIndentedLines("""
@@ -356,7 +356,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         emitDocComment(decl, docHeader);
         Class<?> type = Utils.carrierFor(decl.type());
-        appendLines(STR."""
+        appendLines("""
             public static \{type.getSimpleName()} \{javaName}() {
                 return \{holderClass}.SEGMENT.get(\{holderClass}.LAYOUT, 0L);
             }
@@ -370,7 +370,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         emitDocComment(decl, docHeader);
         Class<?> type = Utils.carrierFor(decl.type());
-        appendLines(STR."""
+        appendLines("""
             public static void \{javaName}(\{type.getSimpleName()} varValue) {
                 \{holderClass}.SEGMENT.set(\{holderClass}.LAYOUT, 0L, varValue);
             }
@@ -383,7 +383,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         appendBlankLine();
         incrAlign();
         emitDocComment(varTree, docHeader);
-        appendLines(STR."""
+        appendLines("""
             public static MemorySegment \{javaName}() {
                 return \{holderClass}.SEGMENT;
             }
@@ -396,7 +396,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         appendBlankLine();
         incrAlign();
         emitDocComment(varTree, docHeader);
-        appendLines(STR."""
+        appendLines("""
             public static void \{javaName}(MemorySegment varValue) {
                 MemorySegment.copy(varValue, 0L, \{holderClass}.SEGMENT, 0L, \{holderClass}.LAYOUT.byteSize());
             }
@@ -412,7 +412,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         emitDocComment(varTree, docHeader);
         if (Utils.isStructOrUnion(elemType)) {
-            appendLines(STR."""
+            appendLines("""
                 public static MemorySegment \{javaName}(\{indexList.decl()}) {
                     try {
                         return (MemorySegment)\{holderClass}.HANDLE.invokeExact(\{holderClass}.SEGMENT, 0L, \{indexList.use()});
@@ -422,7 +422,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 }
                 """);
         } else {
-            appendLines(STR."""
+            appendLines("""
                 public static \{typeCls.getSimpleName()} \{javaName}(\{indexList.decl()}) {
                     return (\{typeCls.getSimpleName()})\{holderClass}.HANDLE.get(\{holderClass}.SEGMENT, 0L, \{indexList.use()});
                 }
@@ -439,13 +439,13 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         emitDocComment(varTree, docHeader);
         if (Utils.isStructOrUnion(elemType)) {
-            appendLines(STR."""
+            appendLines("""
                 public static void \{javaName}(\{indexList.decl()}, MemorySegment varValue) {
                     MemorySegment.copy(varValue, 0L, \{javaName}(\{indexList.use()}), 0L, \{layoutString(elemType)}.byteSize());
                 }
                 """);
         } else {
-            appendLines(STR."""
+            appendLines("""
                 public static void \{javaName}(\{indexList.decl()}, \{typeCls.getSimpleName()} varValue) {
                     \{holderClass}.HANDLE.set(\{holderClass}.SEGMENT, 0L, \{indexList.use()}, varValue);
                 }
@@ -469,7 +469,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                     STR."public static final VarHandle HANDLE = LAYOUT.varHandle(\{path});\n";
             String dimsString = dimensions.stream().map(d -> d.toString())
                     .collect(Collectors.joining(", "));
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 private static class \{mangledName} {
                     public static final \{layoutType} LAYOUT = \{layoutString(varType)};
                     public static final MemorySegment SEGMENT = \{runtimeHelperName()}.findOrThrow("\{var.name()}").reinterpret(LAYOUT.byteSize());
@@ -478,7 +478,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 }
                 """);
         } else {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 private static class \{mangledName} {
                     public static final \{layoutType} LAYOUT = \{layoutString(varType)};
                     public static final MemorySegment SEGMENT = \{runtimeHelperName()}.findOrThrow("\{var.name()}").reinterpret(LAYOUT.byteSize());
@@ -488,7 +488,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         appendBlankLine();
         emitDocComment(var, "Layout for variable:");
-        appendLines(STR."""
+        appendLines("""
                 public static \{layoutType} \{javaName}$layout() {
                     return \{mangledName}.LAYOUT;
                 }
@@ -496,7 +496,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         if (!Utils.isStructOrUnion(varType) && !Utils.isArray(varType)) {
             appendBlankLine();
             emitDocComment(var, "Segment for variable:");
-            appendLines(STR."""
+            appendLines("""
                     public static MemorySegment \{javaName}$segment() {
                         return \{mangledName}.SEGMENT;
                     }
@@ -505,7 +505,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         if (varType instanceof Type.Array) {
             appendBlankLine();
             emitDocComment(var, "Dimensions for array variable:");
-            appendLines(STR."""
+            appendLines("""
                 public static long[] \{javaName}$dimensions() {
                     return \{mangledName}.DIMS;
                 }
@@ -519,7 +519,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         incrAlign();
         if (value instanceof String) {
             emitDocComment(declaration);
-            appendLines(STR."""
+            appendLines("""
                 public static \{javaType.getSimpleName()} \{constantName}() {
                     class Holder {
                         static final \{javaType.getSimpleName()} \{constantName}
@@ -529,11 +529,11 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 }
                 """);
         } else {
-            appendLines(STR."""
+            appendLines("""
                 private static final \{javaType.getSimpleName()} \{constantName} = \{constantValue(javaType, value)};
                 """);
             emitDocComment(declaration);
-            appendLines(STR."""
+            appendLines("""
                 public static \{javaType.getSimpleName()} \{constantName}() {
                     return \{constantName};
                 }
@@ -586,7 +586,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
     private void emitPrimitiveTypedefLayout(String javaName, Type type, Declaration declaration) {
         incrAlign();
         emitDocComment(declaration);
-        appendLines(STR."""
+        appendLines("""
         public static final \{Utils.layoutCarrierFor(type).getSimpleName()} \{javaName} = \{layoutString(type)};
         """);
         decrAlign();

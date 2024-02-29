@@ -188,7 +188,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         Class<?> type = Utils.carrierFor(varTree.type());
         appendBlankLine();
         emitFieldDocComment(varTree, "Getter for field:");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static \{type.getSimpleName()} \{javaName}(MemorySegment \{segmentParam}) {
                 return \{segmentParam}.get(\{layoutField}, \{offsetField});
             }
@@ -201,7 +201,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         Class<?> type = Utils.carrierFor(varTree.type());
         appendBlankLine();
         emitFieldDocComment(varTree, "Setter for field:");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static void \{javaName}(MemorySegment \{segmentParam}, \{type.getSimpleName()} \{valueParam}) {
                 \{segmentParam}.set(\{layoutField}, \{offsetField}, \{valueParam});
             }
@@ -212,7 +212,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         appendBlankLine();
         emitFieldDocComment(varTree, "Getter for field:");
         String segmentParam = safeParameterName(kindName());
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static MemorySegment \{javaName}(MemorySegment \{segmentParam}) {
                 return \{segmentParam}.asSlice(\{offsetField}, \{layoutField}.byteSize());
             }
@@ -224,7 +224,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         emitFieldDocComment(varTree, "Setter for field:");
         String segmentParam = safeParameterName(kindName());
         String valueParam = safeParameterName("fieldValue");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static void \{javaName}(MemorySegment \{segmentParam}, MemorySegment \{valueParam}) {
                 MemorySegment.copy(\{valueParam}, 0L, \{segmentParam}, \{offsetField}, \{layoutField}.byteSize());
             }
@@ -238,11 +238,11 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 .collect(Collectors.joining(", "));
         Type elemType = Utils.typeOrElemType(varTree.type());
         if (Utils.isStructOrUnion(elemType)) {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 private static final MethodHandle \{arrayHandleName} = \{fieldLayoutName}.sliceHandle(\{path});
                 """);
         } else {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 private static final VarHandle \{arrayHandleName} = \{fieldLayoutName}.varHandle(\{path});
                 """);
         }
@@ -256,7 +256,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         appendBlankLine();
         emitFieldDocComment(varTree, "Indexed getter for field:");
         if (Utils.isStructOrUnion(elemType)) {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 public static MemorySegment \{javaName}(MemorySegment \{segmentParam}, \{indexList.decl()}) {
                     try {
                         return (MemorySegment)\{arrayElementHandle}.invokeExact(\{segmentParam}, 0L, \{indexList.use()});
@@ -266,7 +266,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 }
                 """);
         } else {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 public static \{elemTypeCls.getSimpleName()} \{javaName}(MemorySegment \{segmentParam}, \{indexList.decl()}) {
                     return (\{elemTypeCls.getSimpleName()})\{arrayElementHandle}.get(\{segmentParam}, 0L, \{indexList.use()});
                 }
@@ -282,13 +282,13 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         appendBlankLine();
         emitFieldDocComment(varTree, "Indexed setter for field:");
         if (Utils.isStructOrUnion(elemType)) {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 public static void \{javaName}(MemorySegment \{segmentParam}, \{indexList.decl()}, MemorySegment \{valueParam}) {
                     MemorySegment.copy(\{valueParam}, 0L, \{javaName}(\{segmentParam}, \{indexList.use()}), 0L, \{layoutString(elemType)}.byteSize());
                 }
                 """);
         } else {
-            appendIndentedLines(STR."""
+            appendIndentedLines("""
                 public static void \{javaName}(MemorySegment \{segmentParam}, \{indexList.decl()}, \{elemTypeCls.getSimpleName()} \{valueParam}) {
                     \{arrayElementHandle}.set(\{segmentParam}, 0L, \{indexList.use()}, \{valueParam});
                 }
@@ -298,7 +298,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
 
     private void emitAsSlice() {
         String arrayParam = safeParameterName("array");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             /**
              * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
@@ -311,7 +311,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     }
 
     private void emitSizeof() {
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             /**
              * The size (in bytes) of this \{kindName()}
@@ -322,7 +322,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
 
     private void emitAllocatorAllocate() {
         String allocatorParam = safeParameterName("allocator");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             /**
              * Allocate a segment of size {@code layout().byteSize()} using {@code \{allocatorParam}}
@@ -336,7 +336,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     private void emitAllocatorAllocateArray() {
         String allocatorParam = safeParameterName("allocator");
         String elementCountParam = safeParameterName("elementCount");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             /**
              * Allocate an array of size {@code \{elementCountParam}} using {@code \{allocatorParam}}.
@@ -370,7 +370,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     }
 
     private void emitLayoutDecl() {
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             private static final GroupLayout $LAYOUT = \{structOrUnionLayoutString(structType)};
 
@@ -385,12 +385,12 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
 
     private String emitOffsetFieldDecl(Declaration.Variable field, String javaName) {
         String offsetFieldName = STR."\{javaName}$OFFSET";
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             private static final long \{offsetFieldName} = \{ClangOffsetOf.getOrThrow(field) / 8};
             """);
         appendBlankLine();
         emitFieldDocComment(field, "Offset for field:");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static final long \{javaName}$offset() {
                 return \{offsetFieldName};
             }
@@ -401,12 +401,12 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     private String emitLayoutFieldDecl(Declaration.Variable field, String javaName) {
         String layoutFieldName = STR."\{javaName}$LAYOUT";
         String layoutType = Utils.layoutCarrierFor(field.type()).getSimpleName();
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             private static final \{layoutType} \{layoutFieldName} = (\{layoutType})$LAYOUT.select(\{fieldElementPaths(field.name())});
             """);
         appendBlankLine();
         emitFieldDocComment(field, "Layout for field:");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static final \{layoutType} \{javaName}$layout() {
                 return \{layoutFieldName};
             }
@@ -419,13 +419,13 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         List<Long> dimensions = Utils.dimensions(field.type());
         String dimsString = dimensions.stream().map(d -> d.toString())
                 .collect(Collectors.joining(", "));
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             private static long[] \{dimsFieldName} = { \{dimsString} };
             """);
         appendBlankLine();
         emitFieldDocComment(field, "Dimensions for array field:");
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
             public static long[] \{javaName}$dimensions() {
                 return \{dimsFieldName};
             }

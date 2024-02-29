@@ -54,7 +54,7 @@ repositories {
 }
 
 compileJava {
-    options.release = 22
+    options.release = 23
     options.compilerArgs << "--enable-preview"
     options.fork = true
     options.forkOptions.executable = "${jdk22_home}/bin/javac"

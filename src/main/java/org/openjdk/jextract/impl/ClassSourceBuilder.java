@@ -107,7 +107,7 @@ abstract class ClassSourceBuilder {
         if (superName != null) {
             extendsExpr = " extends " + superName;
         }
-        appendLines(STR."""
+        appendLines("""
             \{modifiers} \{kind.kindName} \{className}\{extendsExpr} {
             """);
     }
@@ -129,6 +129,10 @@ abstract class ClassSourceBuilder {
     }
 
     // append multiple lines (indentation is added automatically)
+    void appendLines(StringTemplate s) {
+        appendLines(s.interpolate());
+    }
+
     void appendLines(String s) {
         sb.appendLines(s);
     }
@@ -139,12 +143,16 @@ abstract class ClassSourceBuilder {
 
     // increase indentation before appending lines
     // decrease afterwards
+    void appendIndentedLines(StringTemplate s) {
+        appendIndentedLines(s.interpolate());
+    }
+
     void appendIndentedLines(String s) {
         sb.appendIndentedLines(s);
     }
 
     final void emitDefaultConstructor() {
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             \{className}() {
                 // Should not be called directly
@@ -157,7 +165,7 @@ abstract class ClassSourceBuilder {
     }
 
     final void emitDocComment(Declaration decl, String header) {
-        appendLines(STR."""
+        appendLines("""
             /**
             \{!header.isEmpty() ? STR." * \{header}\n" : ""}\
              * {@snippet lang=c :

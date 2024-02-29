@@ -64,7 +64,7 @@ class ToplevelBuilder implements OutputFactory.Builder {
         first.emitRuntimeHelperMethods();
         first.emitFirstHeaderPreamble(libs, useSystemLoadLibrary);
         // emit basic primitive types
-        first.appendIndentedLines(STR."""
+        first.appendIndentedLines("""
 
             public static final ValueLayout.OfBoolean C_BOOL = ValueLayout.JAVA_BOOLEAN;
             public static final ValueLayout.OfByte C_CHAR = ValueLayout.JAVA_BYTE;

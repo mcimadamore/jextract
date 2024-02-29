@@ -67,7 +67,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
         // beware of mangling!
         String fiName = className().toLowerCase().equals("function") ?
                 "Function$" : "Function";
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             /**
              * The function pointer signature, expressed as a functional interface
@@ -80,7 +80,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
     }
 
     private void emitFunctionalFactory(String fiName) {
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             private static final MethodHandle UP$MH = \{runtimeHelperName()}.upcallHandle(\{className()}.\{fiName}.class, "apply", $DESC);
 
@@ -99,7 +99,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
         String allocParam = needsAllocator ? ", SegmentAllocator alloc" : "";
         String allocArg = needsAllocator ? ", alloc" : "";
         String paramStr = methodType.parameterCount() != 0 ? STR.",\{paramExprs()}" : "";
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             private static final MethodHandle DOWN$MH = Linker.nativeLinker().downcallHandle($DESC);
 
@@ -156,7 +156,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
     }
 
     private void emitDescriptorDecl() {
-        appendIndentedLines(STR."""
+        appendIndentedLines("""
 
             private static final FunctionDescriptor $DESC = \{functionDescriptorString(0, funcType)};
 
