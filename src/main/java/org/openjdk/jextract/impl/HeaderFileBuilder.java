@@ -143,11 +143,11 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         String retType = declType.returnType().getSimpleName();
         boolean isVoid = declType.returnType().equals(void.class);
         String returnNoCast = isVoid ? "" : "return ";
-        String returnWithCast = isVoid ? "" : STR."\{returnNoCast}(\{retType})";
+        StringTemplate returnWithCast = isVoid ? "" : "\{returnNoCast}(\{retType})";
         String paramList = String.join(", ", finalParamNames);
-        String traceArgList = paramList.isEmpty() ?
-                STR."\"\{nativeName}\"" :
-                STR."\"\{nativeName}\", \{paramList}";
+        StringTemplate traceArgList = paramList.isEmpty() ?
+                "\"\{nativeName}\"" :
+                "\"\{nativeName}\", \{paramList}";
         incrAlign();
         if (!isVarArg) {
             String holderClass = newHolderClassName(javaName);
@@ -265,7 +265,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
     }
 
     void emitFirstHeaderPreamble(List<Options.Library> libraries, boolean useSystemLoadLibrary) {
-        List<String> lookups = new ArrayList<>();
+        List<StringTemplate> lookups = new ArrayList<>();
         // if legacy library loading is selected, load libraries (if any) into current loader
         if (useSystemLoadLibrary) {
             appendBlankLine();
@@ -286,8 +286,8 @@ class HeaderFileBuilder extends ClassSourceBuilder {
             // otherwise, add a library lookup per library (if any)
             libraries.stream() // add library lookups (if any)
                     .map(l -> l.specKind() == Options.Library.SpecKind.PATH ?
-                            STR."SymbolLookup.libraryLookup(\"\{l.toQuotedName()}\", LIBRARY_ARENA)" :
-                            STR."SymbolLookup.libraryLookup(System.mapLibraryName(\"\{l.toQuotedName()}\"), LIBRARY_ARENA)")
+                            "SymbolLookup.libraryLookup(\"\{l.toQuotedName()}\", LIBRARY_ARENA)" :
+                            "SymbolLookup.libraryLookup(System.mapLibraryName(\"\{l.toQuotedName()}\"), LIBRARY_ARENA)")
                     .collect(Collectors.toCollection(() -> lookups));
         }
 
@@ -295,16 +295,17 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         lookups.add("Linker.nativeLinker().defaultLookup()"); // fallback to native lookup
 
         // wrap all lookups (but the first) with ".or(...)"
-        List<String> lookupCalls = new ArrayList<>();
+        List<StringTemplate> lookupCalls = new ArrayList<>();
         boolean isFirst = true;
-        for (String lookup : lookups) {
-            lookupCalls.add(isFirst ? lookup : STR.".or(\{lookup})");
+        for (StringTemplate lookup : lookups) {
+            lookupCalls.add(isFirst ? lookup : ".or(\{lookup})");
             isFirst = false;
         }
 
         // chain all the calls together into a combined symbol lookup
         appendBlankLine();
         appendIndentedLines(lookupCalls.stream()
+                .map(StringTemplate::interpolate)
                 .collect(Collectors.joining(STR."\n\{indentString(2)}", "static final SymbolLookup SYMBOL_LOOKUP = ", ";")));
     }
 
@@ -464,9 +465,9 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                     .mapToObj(_ -> "sequenceElement()")
                     .collect(Collectors.joining(", "));
             Type elemType = Utils.typeOrElemType(varType);
-            String accessHandle = Utils.isStructOrUnion(elemType) ?
-                    STR."public static final MethodHandle HANDLE = LAYOUT.sliceHandle(\{path});" :
-                    STR."public static final VarHandle HANDLE = LAYOUT.varHandle(\{path});\n";
+            StringTemplate accessHandle = Utils.isStructOrUnion(elemType) ?
+                    "public static final MethodHandle HANDLE = LAYOUT.sliceHandle(\{path});" :
+                    "public static final VarHandle HANDLE = LAYOUT.varHandle(\{path});\n";
             String dimsString = dimensions.stream().map(d -> d.toString())
                     .collect(Collectors.joining(", "));
             appendIndentedLines("""

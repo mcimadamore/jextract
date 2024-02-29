@@ -167,7 +167,7 @@ abstract class ClassSourceBuilder {
     final void emitDocComment(Declaration decl, String header) {
         appendLines("""
             /**
-            \{!header.isEmpty() ? STR." * \{header}\n" : ""}\
+            \{!header.isEmpty() ? " * \{header}\n" : ""}\
              * {@snippet lang=c :
             \{declarationComment(decl)}
              * }
@@ -192,19 +192,19 @@ abstract class ClassSourceBuilder {
         throw new IllegalArgumentException("Not handled: " + type);
     }
 
-    String layoutString(Type type) {
+    StringTemplate layoutString(Type type) {
         return layoutString(type, Long.MAX_VALUE);
     }
 
-    String layoutString(Type type, long align) {
+    StringTemplate layoutString(Type type, long align) {
         return switch (type) {
             case Primitive p -> primitiveLayoutString(p, align);
             case Declared d when Utils.isEnum(d) -> layoutString(((Constant)d.tree().members().get(0)).type(), align);
-            case Declared d when Utils.isStructOrUnion(d) -> alignIfNeeded(STR."\{JavaName.getFullNameOrThrow(d.tree())}.layout()", ClangAlignOf.getOrThrow(d.tree()) / 8, align);
-            case Delegated d when d.kind() == Delegated.Kind.POINTER -> alignIfNeeded(STR."\{runtimeHelperName()}.C_POINTER", 8, align);
+            case Declared d when Utils.isStructOrUnion(d) -> alignIfNeeded("\{JavaName.getFullNameOrThrow(d.tree())}.layout()", ClangAlignOf.getOrThrow(d.tree()) / 8, align);
+            case Delegated d when d.kind() == Delegated.Kind.POINTER -> alignIfNeeded("\{runtimeHelperName()}.C_POINTER", 8, align);
             case Delegated d -> layoutString(d.type(), align);
-            case Function _ -> alignIfNeeded(STR."\{runtimeHelperName()}.C_POINTER", 8, align);
-            case Array a -> STR."MemoryLayout.sequenceLayout(\{a.elementCount().orElse(0L)}, \{layoutString(a.elementType(), align)})";
+            case Function _ -> alignIfNeeded("\{runtimeHelperName()}.C_POINTER", 8, align);
+            case Array a -> "MemoryLayout.sequenceLayout(\{a.elementCount().orElse(0L)}, \{layoutString(a.elementType(), align)})";
             default -> throw new UnsupportedOperationException();
         };
     }
@@ -216,7 +216,7 @@ abstract class ClassSourceBuilder {
         if (!type.returnType().equals(void.class)) {
             builder.append("FunctionDescriptor.of(");
             builder.append("\n");
-            builder.append(STR."\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}");
+            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}".interpolate());
             if (!noArgs) {
                 builder.append(",");
             }
@@ -228,7 +228,7 @@ abstract class ClassSourceBuilder {
             String delim = "";
             for (Type arg : functionType.argumentTypes()) {
                 builder.append(delim);
-                builder.append(STR."\{indentString(textBoxIndent + 1)}\{layoutString(arg)}");
+                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}".interpolate());
                 delim = ",\n";
             }
             builder.append("\n");
@@ -241,18 +241,18 @@ abstract class ClassSourceBuilder {
         return " ".repeat(size * 4);
     }
 
-    private String primitiveLayoutString(Primitive primitiveType, long align) {
+    private StringTemplate primitiveLayoutString(Primitive primitiveType, long align) {
         return switch (primitiveType.kind()) {
-            case Bool -> STR."\{runtimeHelperName()}.C_BOOL";
-            case Char -> STR."\{runtimeHelperName()}.C_CHAR";
-            case Short -> alignIfNeeded(STR."\{runtimeHelperName()}.C_SHORT", 2, align);
-            case Int -> alignIfNeeded(STR."\{runtimeHelperName()}.C_INT", 4, align);
-            case Long -> alignIfNeeded(STR."\{runtimeHelperName()}.C_LONG", TypeImpl.IS_WINDOWS ? 4 : 8, align);
-            case LongLong -> alignIfNeeded(STR."\{runtimeHelperName()}.C_LONG_LONG", 8, align);
-            case Float -> alignIfNeeded(STR."\{runtimeHelperName()}.C_FLOAT", 4, align);
-            case Double -> alignIfNeeded(STR."\{runtimeHelperName()}.C_DOUBLE", 8, align);
+            case Bool -> "\{runtimeHelperName()}.C_BOOL";
+            case Char -> "\{runtimeHelperName()}.C_CHAR";
+            case Short -> alignIfNeeded("\{runtimeHelperName()}.C_SHORT", 2, align);
+            case Int -> alignIfNeeded("\{runtimeHelperName()}.C_INT", 4, align);
+            case Long -> alignIfNeeded("\{runtimeHelperName()}.C_LONG", TypeImpl.IS_WINDOWS ? 4 : 8, align);
+            case LongLong -> alignIfNeeded("\{runtimeHelperName()}.C_LONG_LONG", 8, align);
+            case Float -> alignIfNeeded("\{runtimeHelperName()}.C_FLOAT", 4, align);
+            case Double -> alignIfNeeded("\{runtimeHelperName()}.C_DOUBLE", 8, align);
             case LongDouble -> TypeImpl.IS_WINDOWS ?
-                    alignIfNeeded(STR."\{runtimeHelperName()}.C_LONG_DOUBLE", 8, align) :
+                    alignIfNeeded("\{runtimeHelperName()}.C_LONG_DOUBLE", 8, align) :
                     paddingLayoutString(8, 0);
             case HalfFloat, Char16, WChar -> paddingLayoutString(2, 0); // unsupported
             case Float128, Int128 -> paddingLayoutString(16, 0); // unsupported
@@ -260,14 +260,14 @@ abstract class ClassSourceBuilder {
         };
     }
 
-    private String alignIfNeeded(String layoutPrefix, long align, long expectedAlign) {
+    private StringTemplate alignIfNeeded(StringTemplate layoutPrefix, long align, long expectedAlign) {
         return align > expectedAlign ?
-                STR."\{runtimeHelperName()}.align(\{layoutPrefix}, \{expectedAlign})" :
+                "\{runtimeHelperName()}.align(\{layoutPrefix}, \{expectedAlign})" :
                 layoutPrefix;
     }
 
-    String paddingLayoutString(long size, int indent) {
-        return STR."\{indentString(indent)}MemoryLayout.paddingLayout(\{size})";
+    StringTemplate paddingLayoutString(long size, int indent) {
+        return "\{indentString(indent)}MemoryLayout.paddingLayout(\{size})";
     }
 
     // Return C source style signature for the given declaration.

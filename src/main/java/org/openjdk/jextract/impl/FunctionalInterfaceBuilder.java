@@ -98,7 +98,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
         boolean needsAllocator = Utils.isStructOrUnion(funcType.returnType());
         String allocParam = needsAllocator ? ", SegmentAllocator alloc" : "";
         String allocArg = needsAllocator ? ", alloc" : "";
-        String paramStr = methodType.parameterCount() != 0 ? STR.",\{paramExprs()}" : "";
+        StringTemplate paramStr = methodType.parameterCount() != 0 ? ",\{paramExprs()}" : "";
         appendIndentedLines("""
 
             private static final MethodHandle DOWN$MH = Linker.nativeLinker().downcallHandle($DESC);
@@ -137,10 +137,10 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
         return result.toString();
     }
 
-    private String retExpr() {
-        String retExpr = "";
+    private StringTemplate retExpr() {
+        StringTemplate retExpr = "";
         if (!methodType.returnType().equals(void.class)) {
-            retExpr = STR."return (\{methodType.returnType().getSimpleName()})";
+            retExpr = "return (\{methodType.returnType().getSimpleName()})";
         }
         return retExpr;
     }

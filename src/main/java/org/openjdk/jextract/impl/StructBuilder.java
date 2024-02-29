@@ -232,7 +232,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     }
 
     private String emitArrayElementHandle(String javaName, Declaration.Variable varTree, String fieldLayoutName, int dims) {
-        String arrayHandleName = STR."\{javaName}$ELEM_HANDLE";
+        StringTemplate arrayHandleName = "\{javaName}$ELEM_HANDLE";
         String path = IntStream.range(0, dims)
                 .mapToObj(_ -> "sequenceElement()")
                 .collect(Collectors.joining(", "));
@@ -246,7 +246,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 private static final VarHandle \{arrayHandleName} = \{fieldLayoutName}.varHandle(\{path});
                 """);
         }
-        return arrayHandleName;
+        return arrayHandleName.interpolate();
     }
 
     private void emitFieldArrayGetter(String javaName, Declaration.Variable varTree, String arrayElementHandle, IndexList indexList) {
@@ -384,7 +384,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     }
 
     private String emitOffsetFieldDecl(Declaration.Variable field, String javaName) {
-        String offsetFieldName = STR."\{javaName}$OFFSET";
+        StringTemplate offsetFieldName = "\{javaName}$OFFSET";
         appendIndentedLines("""
             private static final long \{offsetFieldName} = \{ClangOffsetOf.getOrThrow(field) / 8};
             """);
@@ -395,11 +395,11 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 return \{offsetFieldName};
             }
             """);
-        return offsetFieldName;
+        return offsetFieldName.interpolate();
     }
 
     private String emitLayoutFieldDecl(Declaration.Variable field, String javaName) {
-        String layoutFieldName = STR."\{javaName}$LAYOUT";
+        StringTemplate layoutFieldName = "\{javaName}$LAYOUT";
         String layoutType = Utils.layoutCarrierFor(field.type()).getSimpleName();
         appendIndentedLines("""
             private static final \{layoutType} \{layoutFieldName} = (\{layoutType})$LAYOUT.select(\{fieldElementPaths(field.name())});
@@ -411,11 +411,11 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 return \{layoutFieldName};
             }
             """);
-        return layoutFieldName;
+        return layoutFieldName.interpolate();
     }
 
     private void emitDimensionsFieldDecl(Declaration.Variable field, String javaName) {
-        String dimsFieldName = STR."\{javaName}$DIMS";
+        StringTemplate dimsFieldName = "\{javaName}$DIMS";
         List<Long> dimensions = Utils.dimensions(field.type());
         String dimsString = dimensions.stream().map(d -> d.toString())
                 .collect(Collectors.joining(", "));
@@ -449,7 +449,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
     }
 
     private String structOrUnionLayoutString(long base, Declaration.Scoped scoped, int indent) {
-        List<String> memberLayouts = new ArrayList<>();
+        List<StringTemplate> memberLayouts = new ArrayList<>();
 
         boolean isStruct = scoped.kind() == Scoped.Kind.STRUCT;
 
@@ -468,13 +468,12 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                         size += delta;
                     }
                 }
-                String memberLayout;
+                StringTemplate memberLayout;
                 if (member instanceof Variable var) {
-                    memberLayout = layoutString(var.type(), align);
-                    memberLayout = STR."\{indentString(indent + 1)}\{memberLayout}.withName(\"\{member.name()}\")";
+                    memberLayout = "\{indentString(indent + 1)}\{layoutString(var.type(), align)}.withName(\"\{member.name()}\")";
                 } else {
                     // anon struct
-                    memberLayout = structOrUnionLayoutString(offset, (Scoped) member, indent + 1);
+                    memberLayout = StringTemplate.of(structOrUnionLayoutString(offset, (Scoped) member, indent + 1));
                 }
                 memberLayouts.add(memberLayout);
                 // update offset and size
@@ -500,11 +499,12 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 STR."\{indentString(indent)}MemoryLayout.unionLayout(\n";
         String suffix = STR."\n\{indentString(indent)})";
         String layoutString = memberLayouts.stream()
+                .map(StringTemplate::interpolate)
                 .collect(Collectors.joining(",\n", prefix, suffix));
 
         // the name is only useful for clients accessing the layout, jextract doesn't care about it
         String name = scoped.name().isEmpty() ?
                 AnonymousStruct.anonName(scoped) : scoped.name();
-        return STR."\{layoutString}.withName(\"\{name}\")";
+        return "\{layoutString}.withName(\"\{name}\")".interpolate();
     }
 }
