@@ -478,7 +478,7 @@ public abstract class DeclarationImpl implements Declaration {
             declaration.addAttribute(new DeclarationString(declString));
         }
         public static void with(Declaration declaration, StringTemplate declString) {
-            with(declaration, declString.interpolate());
+            with(declaration, declString.join());
         }
 
         public static Optional<String> get(Declaration declaration) {

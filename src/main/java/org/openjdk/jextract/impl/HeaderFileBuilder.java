@@ -307,7 +307,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         // chain all the calls together into a combined symbol lookup
         appendBlankLine();
         appendIndentedLines(lookupCalls.stream()
-                .map(StringTemplate::interpolate)
+                .map(StringTemplate::join)
                 .collect(Collectors.joining("\n" + indentString(2), "static final SymbolLookup SYMBOL_LOOKUP = ", ";")));
     }
 
@@ -547,7 +547,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
     private String constantValue(Class<?> type, Object value) {
         if (type == MemorySegment.class) {
-            return STR."MemorySegment.ofAddress(\{((Number)value).longValue()}L)";
+            return "MemorySegment.ofAddress(\{((Number)value).longValue()}L)".join();
         } else {
             StringBuilder buf = new StringBuilder();
             if (type == float.class) {
@@ -580,7 +580,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 buf.append("(" + type.getName() + ")");
                 buf.append(n.longValue() + "L");
             } else {
-                throw new IllegalArgumentException(STR."Unhandled type: \{type}, or value: \{value}");
+                throw new IllegalArgumentException("Unhandled type: \{type}, or value: \{value}".join());
             }
             return buf.toString();
         }
@@ -596,7 +596,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
     }
 
     private String newHolderClassName(StringTemplate javaName) {
-        return newHolderClassName(javaName.interpolate());
+        return newHolderClassName(javaName.join());
     }
 
     private String newHolderClassName(String javaName) {

@@ -130,7 +130,7 @@ abstract class ClassSourceBuilder {
 
     // append multiple lines (indentation is added automatically)
     void appendLines(StringTemplate s) {
-        appendLines(s.interpolate());
+        appendLines(s.join());
     }
 
     void appendLines(String s) {
@@ -144,7 +144,7 @@ abstract class ClassSourceBuilder {
     // increase indentation before appending lines
     // decrease afterwards
     void appendIndentedLines(StringTemplate s) {
-        appendIndentedLines(s.interpolate());
+        appendIndentedLines(s.join());
     }
 
     void appendIndentedLines(String s) {
@@ -216,7 +216,7 @@ abstract class ClassSourceBuilder {
         if (!type.returnType().equals(void.class)) {
             builder.append("FunctionDescriptor.of(");
             builder.append("\n");
-            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}".interpolate());
+            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}".join());
             if (!noArgs) {
                 builder.append(",");
             }
@@ -228,7 +228,7 @@ abstract class ClassSourceBuilder {
             String delim = "";
             for (Type arg : functionType.argumentTypes()) {
                 builder.append(delim);
-                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}".interpolate());
+                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}".join());
                 delim = ",\n";
             }
             builder.append("\n");

@@ -154,7 +154,7 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
         public StringTemplate visitFunction(Type.Function t, Void aVoid) {
             StringTemplate res = t.returnType().accept(this, null);
             String args = t.argumentTypes().stream()
-                    .map(a -> a.accept(this, null).interpolate())
+                    .map(a -> a.accept(this, null).join())
                     .collect(Collectors.joining(","));
             return "\{res}(\{args})";
         }
@@ -181,7 +181,7 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
     };
 
     public static String type(Type type) {
-        return type.accept(typeVisitor, null).interpolate();
+        return type.accept(typeVisitor, null).join();
     }
 
     public static String position(Position pos) {

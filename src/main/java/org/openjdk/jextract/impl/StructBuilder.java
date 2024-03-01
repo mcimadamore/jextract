@@ -246,7 +246,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 private static final VarHandle \{arrayHandleName} = \{fieldLayoutName}.varHandle(\{path});
                 """);
         }
-        return arrayHandleName.interpolate();
+        return arrayHandleName.join();
     }
 
     private void emitFieldArrayGetter(String javaName, Declaration.Variable varTree, String arrayElementHandle, IndexList indexList) {
@@ -395,7 +395,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 return \{offsetFieldName};
             }
             """);
-        return offsetFieldName.interpolate();
+        return offsetFieldName.join();
     }
 
     private String emitLayoutFieldDecl(Declaration.Variable field, String javaName) {
@@ -411,7 +411,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 return \{layoutFieldName};
             }
             """);
-        return layoutFieldName.interpolate();
+        return layoutFieldName.join();
     }
 
     private void emitDimensionsFieldDecl(Declaration.Variable field, String javaName) {
@@ -499,7 +499,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 "\{indentString(indent)}MemoryLayout.unionLayout(\n";
         StringTemplate suffix = "\n\{indentString(indent)})";
         String members = memberLayouts.stream()
-                .map(StringTemplate::interpolate)
+                .map(StringTemplate::join)
                 .collect(Collectors.joining(",\n"));
 
         // the name is only useful for clients accessing the layout, jextract doesn't care about it

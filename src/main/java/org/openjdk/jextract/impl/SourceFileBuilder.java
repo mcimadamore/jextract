@@ -108,7 +108,7 @@ final class SourceFileBuilder {
     }
 
     public void appendLines(StringTemplate s) {
-        appendLines(s.interpolate());
+        appendLines(s.join());
     }
 
     public void appendLines(String s) {
@@ -118,7 +118,7 @@ final class SourceFileBuilder {
     }
 
     public void appendIndentedLines(StringTemplate s) {
-        appendIndentedLines(s.interpolate());
+        appendIndentedLines(s.join());
     }
 
     public void appendIndentedLines(String s) {
