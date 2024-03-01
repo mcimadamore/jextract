@@ -229,15 +229,12 @@ class TreeMaker {
 
     public Declaration.Constant createMacro(Position pos, String name, Type type, Object value) {
         Declaration.Constant macro = Declaration.constant(pos, name, value, type);
-        String valueString = value.toString();
-        if (value instanceof String) {
-            // quote string literal
-            valueString = STR."\"\{valueString}\"";
-        } else if (Utils.isPointer(type)) {
-            // add pointer cast to make it look different from a numeric constant
-            valueString = STR."(void*) \{valueString}";
-        }
-        DeclarationString.with(macro, STR."#define \{name} \{valueString}");
+        StringTemplate valueString = switch (value) {
+            case String str -> "\"\{str}\"";
+            case Object ptr when Utils.isPointer(type) -> "(void*) \{ptr}";
+            default -> "\{value}";
+        };
+        DeclarationString.with(macro, "#define \{name} \{valueString}");
         return macro;
     }
 
@@ -526,10 +523,10 @@ class TreeMaker {
         return cursor.prettyPrinted(pp);
     }
 
-    private String enumConstantString(String enumName, Declaration.Constant enumConstant) {
+    private StringTemplate enumConstantString(String enumName, Declaration.Constant enumConstant) {
         if (enumName.isEmpty()) {
             enumName = "<anonymous>";
         }
-        return STR."enum \{enumName}.\{enumConstant.name()} = \{enumConstant.value()}";
+        return "enum \{enumName}.\{enumConstant.name()} = \{enumConstant.value()}";
     }
 }

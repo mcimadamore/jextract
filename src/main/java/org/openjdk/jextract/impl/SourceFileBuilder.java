@@ -96,7 +96,7 @@ final class SourceFileBuilder {
     }
 
     public JavaSourceFile toFile(String suffix, Function<String, String> finisher) {
-        return new JavaSourceFile(STR."\{className}\{suffix}", packageName, finisher.apply(sb.toString()));
+        return new JavaSourceFile(className + suffix, packageName, finisher.apply(sb.toString()));
     }
 
     public JavaSourceFile toFile(Function<String, String> finisher) {

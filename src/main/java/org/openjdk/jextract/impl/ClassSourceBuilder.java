@@ -233,7 +233,8 @@ abstract class ClassSourceBuilder {
             }
             builder.append("\n");
         }
-        builder.append(STR."\{indentString(textBoxIndent)})");
+        builder.append(indentString(textBoxIndent));
+        builder.append(")");
         return builder.toString();
     }
 

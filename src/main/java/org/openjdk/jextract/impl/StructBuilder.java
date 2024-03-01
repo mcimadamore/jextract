@@ -152,7 +152,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
             emitFieldGetter(javaName, varTree, layoutField, offsetField);
             emitFieldSetter(javaName, varTree, layoutField, offsetField);
         } else {
-            throw new IllegalArgumentException(STR."Type not supported: \{varTree.type()}");
+            throw new IllegalArgumentException("Type not supported: " + varTree.type());
         }
     }
 
@@ -432,7 +432,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
             """);
     }
 
-    private String structOrUnionLayoutString(Type type) {
+    private StringTemplate structOrUnionLayoutString(Type type) {
         return switch (type) {
             case Declared d when Utils.isStructOrUnion(type) -> structOrUnionLayoutString(0, d.tree(), 0);
             default -> throw new UnsupportedOperationException(type.toString());
@@ -448,7 +448,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
         }
     }
 
-    private String structOrUnionLayoutString(long base, Declaration.Scoped scoped, int indent) {
+    private StringTemplate structOrUnionLayoutString(long base, Declaration.Scoped scoped, int indent) {
         List<StringTemplate> memberLayouts = new ArrayList<>();
 
         boolean isStruct = scoped.kind() == Scoped.Kind.STRUCT;
@@ -473,7 +473,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                     memberLayout = "\{indentString(indent + 1)}\{layoutString(var.type(), align)}.withName(\"\{member.name()}\")";
                 } else {
                     // anon struct
-                    memberLayout = StringTemplate.of(structOrUnionLayoutString(offset, (Scoped) member, indent + 1));
+                    memberLayout = structOrUnionLayoutString(offset, (Scoped) member, indent + 1);
                 }
                 memberLayouts.add(memberLayout);
                 // update offset and size
@@ -494,17 +494,17 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
             memberLayouts.add(paddingLayoutString(trailPadding, indent + 1));
         }
 
-        String prefix = isStruct ?
-                STR."\{indentString(indent)}MemoryLayout.structLayout(\n" :
-                STR."\{indentString(indent)}MemoryLayout.unionLayout(\n";
-        String suffix = STR."\n\{indentString(indent)})";
-        String layoutString = memberLayouts.stream()
+        StringTemplate prefix = isStruct ?
+                "\{indentString(indent)}MemoryLayout.structLayout(\n" :
+                "\{indentString(indent)}MemoryLayout.unionLayout(\n";
+        StringTemplate suffix = "\n\{indentString(indent)})";
+        String members = memberLayouts.stream()
                 .map(StringTemplate::interpolate)
-                .collect(Collectors.joining(",\n", prefix, suffix));
+                .collect(Collectors.joining(",\n"));
 
         // the name is only useful for clients accessing the layout, jextract doesn't care about it
         String name = scoped.name().isEmpty() ?
                 AnonymousStruct.anonName(scoped) : scoped.name();
-        return "\{layoutString}.withName(\"\{name}\")".interpolate();
+        return "\{prefix}\{members}\{suffix}.withName(\"\{name}\")";
     }
 }

@@ -308,7 +308,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         appendBlankLine();
         appendIndentedLines(lookupCalls.stream()
                 .map(StringTemplate::interpolate)
-                .collect(Collectors.joining(STR."\n\{indentString(2)}", "static final SymbolLookup SYMBOL_LOOKUP = ", ";")));
+                .collect(Collectors.joining("\n" + indentString(2), "static final SymbolLookup SYMBOL_LOOKUP = ", ";")));
     }
 
     void emitRuntimeHelperMethods() {
@@ -459,7 +459,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
     private String emitVarHolderClass(Declaration.Variable var, String javaName) {
         Type varType = var.type();
-        String mangledName = newHolderClassName(STR."\{javaName}$constants");
+        String mangledName = newHolderClassName("\{javaName}$constants");
         String layoutType = Utils.layoutCarrierFor(varType).getSimpleName();
         if (varType instanceof Type.Array) {
             List<Long> dimensions = Utils.dimensions(varType);
@@ -593,6 +593,10 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         public static final \{Utils.layoutCarrierFor(type).getSimpleName()} \{javaName} = \{layoutString(type)};
         """);
         decrAlign();
+    }
+
+    private String newHolderClassName(StringTemplate javaName) {
+        return newHolderClassName(javaName.interpolate());
     }
 
     private String newHolderClassName(String javaName) {

@@ -132,55 +132,56 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
         return null;
     }
 
-    private static Type.Visitor<String, Void> typeVisitor = new Type.Visitor<>() {
+    private static Type.Visitor<StringTemplate, Void> typeVisitor = new Type.Visitor<>() {
         @Override
-        public String visitPrimitive(Type.Primitive t, Void aVoid) {
-            return t.kind().toString();
+        public StringTemplate visitPrimitive(Type.Primitive t, Void aVoid) {
+            return StringTemplate.of(t.kind().toString());
         }
 
         @Override
-        public String visitDelegated(Type.Delegated t, Void aVoid) {
+        public StringTemplate visitDelegated(Type.Delegated t, Void aVoid) {
             switch (t.kind()) {
                 case TYPEDEF:
-                    return "typedef " + t.name() + " = " + t.type().accept(this, null);
+                    return "typedef \{t.name()} = \{t.type().accept(this, null)}";
                 case POINTER:
-                    return "(" + t.type().accept(this, null) + ")*";
+                    return "(\{t.type().accept(this, null)})*";
                 default:
-                    return t.kind() + " = " + t.type().accept(this, null);
+                    return "\{t.kind()} = \{t.type().accept(this, null)}";
             }
         }
 
         @Override
-        public String visitFunction(Type.Function t, Void aVoid) {
-            String res = t.returnType().accept(this, null);
+        public StringTemplate visitFunction(Type.Function t, Void aVoid) {
+            StringTemplate res = t.returnType().accept(this, null);
             String args = t.argumentTypes().stream()
-                    .map(a -> a.accept(this, null))
-                    .collect(Collectors.joining(",", "(", ")"));
-            return res + args;
+                    .map(a -> a.accept(this, null).interpolate())
+                    .collect(Collectors.joining(","));
+            return "\{res}(\{args})";
         }
 
         @Override
-        public String visitDeclared(Type.Declared t, Void aVoid) {
-            return "Declared(" + t.tree().name() + ")";
+        public StringTemplate visitDeclared(Type.Declared t, Void aVoid) {
+            return "Declared(\{t.tree().name()})";
         }
 
         @Override
-        public String visitArray(Type.Array t, Void aVoid) {
-            String brackets = String.format("%s[%s]", t.kind() == Type.Array.Kind.VECTOR ? "v" : "",
-                    t.elementCount().isPresent() ? t.elementCount().getAsLong() : "");
-            return t.elementType().accept(this, null) + brackets;
+        public StringTemplate visitArray(Type.Array t, Void aVoid) {
+            String prefix = t.kind() == Type.Array.Kind.VECTOR ? "v" : "";
+            String count = t.elementCount().isPresent() ?
+                    String.valueOf(t.elementCount().getAsLong()) : "";
+            return "\{t.elementType().accept(this, null)}\{prefix}[\{count}]";
         }
 
         @Override
-        public String visitType(Type t, Void aVoid) {
+        public StringTemplate visitType(Type t, Void aVoid) {
             return t.isErroneous() ?
-                    STR."<error: \{((TypeImpl.ErronrousTypeImpl)t).erroneousName}>" :
-                    STR."<unknown: \{t.getClass().getName()}>";
+                    "<error: \{((TypeImpl.ErronrousTypeImpl)t).erroneousName}>" :
+                    "<unknown: \{t.getClass().getName()}>";
         }
     };
 
     public static String type(Type type) {
-        return type.accept(typeVisitor, null);
+        return type.accept(typeVisitor, null).interpolate();
     }
 
     public static String position(Position pos) {
