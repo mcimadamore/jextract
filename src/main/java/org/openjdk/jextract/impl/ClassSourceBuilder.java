@@ -216,7 +216,7 @@ abstract class ClassSourceBuilder {
         if (!type.returnType().equals(void.class)) {
             builder.append("FunctionDescriptor.of(");
             builder.append("\n");
-            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}".join());
+            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}");
             if (!noArgs) {
                 builder.append(",");
             }
@@ -228,7 +228,7 @@ abstract class ClassSourceBuilder {
             String delim = "";
             for (Type arg : functionType.argumentTypes()) {
                 builder.append(delim);
-                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}".join());
+                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}");
                 delim = ",\n";
             }
             builder.append("\n");

@@ -144,7 +144,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         boolean isVoid = declType.returnType().equals(void.class);
         String returnNoCast = isVoid ? "" : "return ";
         StringTemplate returnWithCast = isVoid ?
-                StringTemplate.EMPTY :
+                "\{}" :
                 "\{returnNoCast}(\{retType})";
         String paramList = String.join(", ", finalParamNames);
         StringTemplate traceArgList = paramList.isEmpty() ?
@@ -293,8 +293,8 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                     .collect(Collectors.toCollection(() -> lookups));
         }
 
-        lookups.add(StringTemplate.of("SymbolLookup.loaderLookup()")); // fallback to loader lookup
-        lookups.add(StringTemplate.of("Linker.nativeLinker().defaultLookup()")); // fallback to native lookup
+        lookups.add("\{}SymbolLookup.loaderLookup()"); // fallback to loader lookup
+        lookups.add("\{}Linker.nativeLinker().defaultLookup()"); // fallback to native lookup
 
         // wrap all lookups (but the first) with ".or(...)"
         List<StringTemplate> lookupCalls = new ArrayList<>();

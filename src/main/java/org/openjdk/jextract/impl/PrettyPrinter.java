@@ -135,7 +135,7 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
     private static Type.Visitor<StringTemplate, Void> typeVisitor = new Type.Visitor<>() {
         @Override
         public StringTemplate visitPrimitive(Type.Primitive t, Void aVoid) {
-            return StringTemplate.of(t.kind().toString());
+            return "\{t.kind()}";
         }
 
         @Override
