@@ -46,6 +46,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.StringTemplate.str;
+
 /**
  * Superclass for .java source generator classes.
  */
@@ -130,7 +132,7 @@ abstract class ClassSourceBuilder {
 
     // append multiple lines (indentation is added automatically)
     void appendLines(StringTemplate s) {
-        appendLines(s.join());
+        appendLines(str(s));
     }
 
     void appendLines(String s) {
@@ -144,7 +146,7 @@ abstract class ClassSourceBuilder {
     // increase indentation before appending lines
     // decrease afterwards
     void appendIndentedLines(StringTemplate s) {
-        appendIndentedLines(s.join());
+        appendIndentedLines(str(s));
     }
 
     void appendIndentedLines(String s) {
@@ -216,7 +218,7 @@ abstract class ClassSourceBuilder {
         if (!type.returnType().equals(void.class)) {
             builder.append("FunctionDescriptor.of(");
             builder.append("\n");
-            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}");
+            builder.append(str("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}"));
             if (!noArgs) {
                 builder.append(",");
             }
@@ -228,7 +230,7 @@ abstract class ClassSourceBuilder {
             String delim = "";
             for (Type arg : functionType.argumentTypes()) {
                 builder.append(delim);
-                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}");
+                builder.append(str("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}"));
                 delim = ",\n";
             }
             builder.append("\n");

@@ -33,6 +33,8 @@ import org.openjdk.jextract.Declaration.Bitfield;
 import org.openjdk.jextract.Position;
 import org.openjdk.jextract.Type;
 
+import static java.lang.StringTemplate.str;
+
 public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
 
     private static String SPACES = " ".repeat(92);
@@ -154,7 +156,7 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
         public StringTemplate visitFunction(Type.Function t, Void aVoid) {
             StringTemplate res = t.returnType().accept(this, null);
             String args = t.argumentTypes().stream()
-                    .map(a -> a.accept(this, null).join())
+                    .map(a -> str(a.accept(this, null)))
                     .collect(Collectors.joining(","));
             return "\{res}(\{args})";
         }
@@ -181,7 +183,7 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
     };
 
     public static String type(Type type) {
-        return type.accept(typeVisitor, null).join();
+        return str(type.accept(typeVisitor, null));
     }
 
     public static String position(Position pos) {

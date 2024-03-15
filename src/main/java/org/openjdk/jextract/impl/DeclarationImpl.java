@@ -38,6 +38,8 @@ import org.openjdk.jextract.Declaration;
 import org.openjdk.jextract.Position;
 import org.openjdk.jextract.Type;
 
+import static java.lang.StringTemplate.str;
+
 public abstract class DeclarationImpl implements Declaration {
 
     private final String name;
@@ -478,7 +480,7 @@ public abstract class DeclarationImpl implements Declaration {
             declaration.addAttribute(new DeclarationString(declString));
         }
         public static void with(Declaration declaration, StringTemplate declString) {
-            with(declaration, declString.join());
+            with(declaration, str(declString));
         }
 
         public static Optional<String> get(Declaration declaration) {

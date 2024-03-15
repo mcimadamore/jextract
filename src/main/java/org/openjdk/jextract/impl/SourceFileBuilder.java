@@ -28,6 +28,8 @@ import org.openjdk.jextract.JavaSourceFile;
 
 import java.util.function.Function;
 
+import static java.lang.StringTemplate.str;
+
 final class SourceFileBuilder {
 
     private static final boolean SHOW_GENERATING_CLASS = Boolean.getBoolean("jextract.showGeneratingClass");
@@ -108,7 +110,7 @@ final class SourceFileBuilder {
     }
 
     public void appendLines(StringTemplate s) {
-        appendLines(s.join());
+        appendLines(str(s));
     }
 
     public void appendLines(String s) {
@@ -118,7 +120,7 @@ final class SourceFileBuilder {
     }
 
     public void appendIndentedLines(StringTemplate s) {
-        appendIndentedLines(s.join());
+        appendIndentedLines(str(s));
     }
 
     public void appendIndentedLines(String s) {

@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.StringTemplate.str;
+
 /**
  * This class generates static utilities class for C structs, unions.
  */
@@ -246,7 +248,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 private static final VarHandle \{arrayHandleName} = \{fieldLayoutName}.varHandle(\{path});
                 """);
         }
-        return arrayHandleName.join();
+        return str(arrayHandleName);
     }
 
     private void emitFieldArrayGetter(String javaName, Declaration.Variable varTree, String arrayElementHandle, IndexList indexList) {
@@ -395,7 +397,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 return \{offsetFieldName};
             }
             """);
-        return offsetFieldName.join();
+        return str(offsetFieldName);
     }
 
     private String emitLayoutFieldDecl(Declaration.Variable field, String javaName) {
@@ -411,7 +413,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 return \{layoutFieldName};
             }
             """);
-        return layoutFieldName.join();
+        return str(layoutFieldName);
     }
 
     private void emitDimensionsFieldDecl(Declaration.Variable field, String javaName) {
@@ -499,7 +501,7 @@ final class StructBuilder extends ClassSourceBuilder implements OutputFactory.Bu
                 "\{indentString(indent)}MemoryLayout.unionLayout(\n";
         StringTemplate suffix = "\n\{indentString(indent)})";
         String members = memberLayouts.stream()
-                .map(StringTemplate::join)
+                .map(StringTemplate::str)
                 .collect(Collectors.joining(",\n"));
 
         // the name is only useful for clients accessing the layout, jextract doesn't care about it

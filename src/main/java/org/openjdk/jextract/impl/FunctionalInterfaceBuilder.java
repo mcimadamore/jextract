@@ -100,7 +100,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
         String allocArg = needsAllocator ? ", alloc" : "";
         StringTemplate paramStr = methodType.parameterCount() != 0 ?
                 ",\{paramExprs()}" :
-                "\{}";
+                t"";
         appendIndentedLines("""
 
             private static final MethodHandle DOWN$MH = Linker.nativeLinker().downcallHandle($DESC);
@@ -140,7 +140,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
     }
 
     private StringTemplate retExpr() {
-        StringTemplate retExpr = "\{}";
+        StringTemplate retExpr = t"";
         if (!methodType.returnType().equals(void.class)) {
             retExpr = "return (\{methodType.returnType().getSimpleName()})";
         }

@@ -41,6 +41,8 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.StringTemplate.str;
+
 /**
  * A helper class to generate header interface class in source form.
  * After aggregating various constituents of a .java source, build
@@ -142,10 +144,9 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
         String retType = declType.returnType().getSimpleName();
         boolean isVoid = declType.returnType().equals(void.class);
-        String returnNoCast = isVoid ? "" : "return ";
         StringTemplate returnWithCast = isVoid ?
-                "\{}" :
-                "\{returnNoCast}(\{retType})";
+                t"" :
+                "return (\{retType})";
         String paramList = String.join(", ", finalParamNames);
         StringTemplate traceArgList = paramList.isEmpty() ?
                 "\"\{nativeName}\"" :
@@ -293,8 +294,8 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                     .collect(Collectors.toCollection(() -> lookups));
         }
 
-        lookups.add("\{}SymbolLookup.loaderLookup()"); // fallback to loader lookup
-        lookups.add("\{}Linker.nativeLinker().defaultLookup()"); // fallback to native lookup
+        lookups.add(t"SymbolLookup.loaderLookup()"); // fallback to loader lookup
+        lookups.add(t"Linker.nativeLinker().defaultLookup()"); // fallback to native lookup
 
         // wrap all lookups (but the first) with ".or(...)"
         List<StringTemplate> lookupCalls = new ArrayList<>();
@@ -307,7 +308,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
         // chain all the calls together into a combined symbol lookup
         appendBlankLine();
         appendIndentedLines(lookupCalls.stream()
-                .map(StringTemplate::join)
+                .map(StringTemplate::str)
                 .collect(Collectors.joining("\n" + indentString(2), "static final SymbolLookup SYMBOL_LOOKUP = ", ";")));
     }
 
@@ -547,7 +548,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
 
     private String constantValue(Class<?> type, Object value) {
         if (type == MemorySegment.class) {
-            return "MemorySegment.ofAddress(\{((Number)value).longValue()}L)".join();
+            return str("MemorySegment.ofAddress(\{((Number)value).longValue()}L)");
         } else {
             StringBuilder buf = new StringBuilder();
             if (type == float.class) {
@@ -580,7 +581,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
                 buf.append("(" + type.getName() + ")");
                 buf.append(n.longValue() + "L");
             } else {
-                throw new IllegalArgumentException("Unhandled type: \{type}, or value: \{value}".join());
+                throw new IllegalArgumentException(str("Unhandled type: \{type}, or value: \{value}"));
             }
             return buf.toString();
         }
@@ -596,7 +597,7 @@ class HeaderFileBuilder extends ClassSourceBuilder {
     }
 
     private String newHolderClassName(StringTemplate javaName) {
-        return newHolderClassName(javaName.join());
+        return newHolderClassName(str(javaName));
     }
 
     private String newHolderClassName(String javaName) {
