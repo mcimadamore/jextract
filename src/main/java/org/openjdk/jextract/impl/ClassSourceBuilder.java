@@ -108,7 +108,7 @@ abstract class ClassSourceBuilder {
         if (superName != null) {
             extendsExpr = " extends " + superName;
         }
-        appendLines(str("\{modifiers} \{kind.kindName} \{className}\{extendsExpr} {"));
+        appendLines("\{modifiers} \{kind.kindName} \{className}\{extendsExpr} {".join());
     }
 
     final void classEnd() {
@@ -150,12 +150,12 @@ abstract class ClassSourceBuilder {
     }
 
     final void emitDefaultConstructor() {
-        appendIndentedLines(str("""
+        appendIndentedLines("""
 
             \{className}() {
                 // Should not be called directly
             }
-            """));
+            """.join());
     }
 
     final void emitDocComment(Declaration decl) {
@@ -163,14 +163,14 @@ abstract class ClassSourceBuilder {
     }
 
     final void emitDocComment(Declaration decl, String header) {
-        appendLines(str("""
+        appendLines("""
             /**
             \{!header.isEmpty() ? " * \{header}\n" : ""}\
              * {@snippet lang=c :
             \{declarationComment(decl)}
              * }
              */
-            """));
+            """.join());
     }
 
     public String mangleName(String javaName, Class<?> type) {
@@ -202,7 +202,7 @@ abstract class ClassSourceBuilder {
             case Delegated d when d.kind() == Delegated.Kind.POINTER -> alignIfNeeded(runtimeHelperName() + ".C_POINTER", 8, align);
             case Delegated d -> layoutString(d.type(), align);
             case Function _ -> alignIfNeeded(runtimeHelperName() + ".C_POINTER", 8, align);
-            case Array a -> str("MemoryLayout.sequenceLayout(\{a.elementCount().orElse(0L)}, \{layoutString(a.elementType(), align)})");
+            case Array a -> "MemoryLayout.sequenceLayout(\{a.elementCount().orElse(0L)}, \{layoutString(a.elementType(), align)})".join();
             default -> throw new UnsupportedOperationException();
         };
     }
@@ -214,7 +214,7 @@ abstract class ClassSourceBuilder {
         if (!type.returnType().equals(void.class)) {
             builder.append("FunctionDescriptor.of(");
             builder.append("\n");
-            builder.append(str("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}"));
+            builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}".join());
             if (!noArgs) {
                 builder.append(",");
             }
@@ -226,7 +226,7 @@ abstract class ClassSourceBuilder {
             String delim = "";
             for (Type arg : functionType.argumentTypes()) {
                 builder.append(delim);
-                builder.append(str("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}"));
+                builder.append("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}".join());
                 delim = ",\n";
             }
             builder.append("\n");
@@ -260,12 +260,12 @@ abstract class ClassSourceBuilder {
 
     private String alignIfNeeded(String layoutPrefix, long align, long expectedAlign) {
         return align > expectedAlign ?
-                str("\{runtimeHelperName()}.align(\{layoutPrefix}, \{expectedAlign})") :
+                "\{runtimeHelperName()}.align(\{layoutPrefix}, \{expectedAlign})".join() :
                 layoutPrefix;
     }
 
     String paddingLayoutString(long size, int indent) {
-        return str("\{indentString(indent)}MemoryLayout.paddingLayout(\{size})");
+        return "\{indentString(indent)}MemoryLayout.paddingLayout(\{size})".join();
     }
 
     // Return C source style signature for the given declaration.

@@ -176,8 +176,8 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
         @Override
         public String visitType(Type t, Void aVoid) {
             return t.isErroneous() ?
-                    str("<error: \{((TypeImpl.ErronrousTypeImpl) t).erroneousName}>") :
-                    str("<unknown: \{t.getClass().getName()}>");
+                    "<error: \{((TypeImpl.ErronrousTypeImpl) t).erroneousName}>".join() :
+                    "<unknown: \{t.getClass().getName()}>".join();
         }
     };
 

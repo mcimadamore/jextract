@@ -59,8 +59,8 @@ public class Logger {
 
     public void err(Position pos, String key, Object... args) {
         String msg = Position.NO_POSITION.equals(pos) ?
-            str("error: \{format(key, args)}") :
-            str("\{position(pos)}: error: \{format(key, args)}");
+            "error: \{format(key, args)}".join() :
+            "\{position(pos)}: error: \{format(key, args)}".join();
         errWriter.println(msg);
         nErrors++;
     }
@@ -71,8 +71,8 @@ public class Logger {
 
     public void warn(Position pos, String key, Object... args) {
         String msg = Position.NO_POSITION.equals(pos) ?
-            str("warning: \{format(key, args)}") :
-            str("\{position(pos)}: warning: \{format(key, args)}");
+            "warning: \{format(key, args)}".join() :
+            "\{position(pos)}: warning: \{format(key, args)}".join();
         errWriter.println(msg);
     }
 
@@ -89,8 +89,8 @@ public class Logger {
     public void clangErr(Position pos, String msg) {
         errWriter.println(
             Position.NO_POSITION.equals(pos) ?
-                str("error: \{msg}") :
-                str("\{position(pos)}: error: \{msg}")
+                "error: \{msg}".join() :
+                "\{position(pos)}: error: \{msg}".join()
         );
         nClangErrors++;
     }
@@ -98,8 +98,8 @@ public class Logger {
     public void clangWarn(Position pos, String msg) {
         errWriter.println(
             Position.NO_POSITION.equals(pos) ?
-                str("warning: \{msg}") :
-                str("\{position(pos)}: warning: \{msg}")
+                "warning: \{msg}".join() :
+                "\{position(pos)}: warning: \{msg}".join()
         );
     }
 
@@ -121,7 +121,7 @@ public class Logger {
     }
 
     public void fatal(Throwable t, String msg, Object... args) {
-        errWriter.println(str("fatal: \{format(msg, args)}"));
+        errWriter.println("fatal: \{format(msg, args)}".join());
         if (JextractTool.DEBUG) {
             printStackTrace(t);
         }

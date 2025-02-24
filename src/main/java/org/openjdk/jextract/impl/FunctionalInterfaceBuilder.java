@@ -69,7 +69,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
         // beware of mangling!
         String fiName = className().toLowerCase().equals("function") ?
                 "Function$" : "Function";
-        appendIndentedLines(str("""
+        appendIndentedLines("""
 
             /**
              * The function pointer signature, expressed as a functional interface
@@ -77,12 +77,12 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
             public interface \{fiName} {
                 \{methodType.returnType().getSimpleName()} apply(\{paramExprs()});
             }
-            """));
+            """.join());
         return fiName;
     }
 
     private void emitFunctionalFactory(String fiName) {
-        appendIndentedLines(str("""
+        appendIndentedLines("""
 
             private static final MethodHandle UP$MH = \{runtimeHelperName()}.upcallHandle(\{className()}.\{fiName}.class, "apply", $DESC);
 
@@ -93,15 +93,15 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
             public static MemorySegment allocate(\{className()}.\{fiName} fi, Arena arena) {
                 return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
             }
-            """));
+            """.join());
     }
 
     private void emitInvoke() {
         boolean needsAllocator = Utils.isStructOrUnion(funcType.returnType());
         String allocParam = needsAllocator ? ", SegmentAllocator alloc" : "";
         String allocArg = needsAllocator ? ", alloc" : "";
-        String paramStr = methodType.parameterCount() != 0 ? str(",\{paramExprs()}") : "";
-        appendIndentedLines(str("""
+        String paramStr = methodType.parameterCount() != 0 ? ",\{paramExprs()}".join() : "";
+        appendIndentedLines("""
 
             private static final MethodHandle DOWN$MH = Linker.nativeLinker().downcallHandle($DESC);
 
@@ -115,7 +115,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
                     throw new AssertionError("should not reach here", ex$);
                 }
             }
-            """));
+            """.join());
     }
 
     // private generation
@@ -142,7 +142,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
     private String retExpr() {
         String retExpr = "";
         if (!methodType.returnType().equals(void.class)) {
-            retExpr = str("return (\{methodType.returnType().getSimpleName()})");
+            retExpr = "return (\{methodType.returnType().getSimpleName()})".join();
         }
         return retExpr;
     }
@@ -158,7 +158,7 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
     }
 
     private void emitDescriptorDecl() {
-        appendIndentedLines(str("""
+        appendIndentedLines("""
 
             private static final FunctionDescriptor $DESC = \{functionDescriptorString(0, funcType)};
 
@@ -168,6 +168,6 @@ final class FunctionalInterfaceBuilder extends ClassSourceBuilder {
             public static FunctionDescriptor descriptor() {
                 return $DESC;
             }
-            """));
+            """.join());
     }
 }

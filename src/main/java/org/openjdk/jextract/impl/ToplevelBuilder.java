@@ -61,7 +61,7 @@ class ToplevelBuilder implements OutputFactory.Builder {
     }
 
     private static HeaderFileBuilder createFirstHeader(SourceFileBuilder sfb, List<Options.Library> libs, boolean useSystemLoadLibrary) {
-        HeaderFileBuilder first = new HeaderFileBuilder(sfb, str("\{sfb.className()}#{SUFFIX}"), null, sfb.className());
+        HeaderFileBuilder first = new HeaderFileBuilder(sfb, "\{sfb.className()}#{SUFFIX}".join(), null, sfb.className());
         first.appendBlankLine();
         first.classBegin();
         first.emitDefaultConstructor();
