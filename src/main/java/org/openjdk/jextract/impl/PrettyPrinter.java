@@ -33,6 +33,8 @@ import org.openjdk.jextract.Declaration.Bitfield;
 import org.openjdk.jextract.Position;
 import org.openjdk.jextract.Type;
 
+import static java.lang.StringTemplate.str;
+
 public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
 
     private static String SPACES = " ".repeat(92);
@@ -174,8 +176,8 @@ public class PrettyPrinter implements Declaration.Visitor<Void, Void> {
         @Override
         public String visitType(Type t, Void aVoid) {
             return t.isErroneous() ?
-                    String.format("<error: %1$s>", ((TypeImpl.ErronrousTypeImpl) t).erroneousName) :
-                    String.format("<unknown: %1$s>", t.getClass().getName());
+                    str("<error: \{((TypeImpl.ErronrousTypeImpl) t).erroneousName}>") :
+                    str("<unknown: \{t.getClass().getName()}>");
         }
     };
 

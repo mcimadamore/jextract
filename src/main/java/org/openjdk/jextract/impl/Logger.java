@@ -33,6 +33,8 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import static java.lang.StringTemplate.str;
+
 /**
  * Minimal utility class to print jextract warning/errors.
  */
@@ -57,8 +59,8 @@ public class Logger {
 
     public void err(Position pos, String key, Object... args) {
         String msg = Position.NO_POSITION.equals(pos) ?
-            String.format("error: %1$s", format(key, args)) :
-            String.format("%1$s: error: %2$s", position(pos), format(key, args));
+            str("error: \{format(key, args)}") :
+            str("\{position(pos)}: error: \{format(key, args)}");
         errWriter.println(msg);
         nErrors++;
     }
@@ -69,8 +71,8 @@ public class Logger {
 
     public void warn(Position pos, String key, Object... args) {
         String msg = Position.NO_POSITION.equals(pos) ?
-            String.format("warning: %1$s", format(key, args)) :
-            String.format("%1$s: warning: %2$s", position(pos), format(key, args));
+            str("warning: \{format(key, args)}") :
+            str("\{position(pos)}: warning: \{format(key, args)}");
         errWriter.println(msg);
     }
 
@@ -87,8 +89,8 @@ public class Logger {
     public void clangErr(Position pos, String msg) {
         errWriter.println(
             Position.NO_POSITION.equals(pos) ?
-                String.format("error: %1$s", msg) :
-                String.format("%1$s: error: %2$s", position(pos), msg)
+                str("error: \{msg}") :
+                str("\{position(pos)}: error: \{msg}")
         );
         nClangErrors++;
     }
@@ -96,8 +98,8 @@ public class Logger {
     public void clangWarn(Position pos, String msg) {
         errWriter.println(
             Position.NO_POSITION.equals(pos) ?
-                String.format("warning: %1$s", msg) :
-                String.format("%1$s: warning: %2$s", position(pos), msg)
+                str("warning: \{msg}") :
+                str("\{position(pos)}: warning: \{msg}")
         );
     }
 
@@ -119,7 +121,7 @@ public class Logger {
     }
 
     public void fatal(Throwable t, String msg, Object... args) {
-        errWriter.println(String.format("fatal: %1$s", format(msg, args)));
+        errWriter.println(str("fatal: \{format(msg, args)}"));
         if (JextractTool.DEBUG) {
             printStackTrace(t);
         }

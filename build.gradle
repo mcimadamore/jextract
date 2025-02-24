@@ -60,9 +60,10 @@ repositories {
 }
 
 compileJava {
-    options.release = 23
+    options.release = 25
     options.fork = true
     options.forkOptions.executable = "${jdk_home}/bin/javac${os_exe_suffix}"
+    options.compilerArgs = [ "--enable-preview" ]
 }
 
 jar {
@@ -124,8 +125,8 @@ task createJextractImage(type: Exec) {
     outputs.dir(jextract_app_dir)
 
     def quote_jlink_opts = Os.isFamily(Os.FAMILY_WINDOWS)?
-        '\\"--enable-native-access=org.openjdk.jextract\\"' :
-        '"--enable-native-access=org.openjdk.jextract"'
+        '\\"--enable-native-access=org.openjdk.jextract --enable-preview\\"' :
+        '"--enable-native-access=org.openjdk.jextract --enable-preview"'
 
     doFirst {
         delete(jextract_app_dir)
@@ -235,6 +236,7 @@ void createJtregTask(String name, String jacocoAgent, String os_lib_dir) {
                 "-jdk", "$buildDir/jextract-jdk-test-image",
                 "-nativepath:$buildDir/testlib-install/${os_lib_dir}",
                 "-javaoption:--enable-native-access=org.openjdk.jextract,ALL-UNNAMED",
+                "-javacoption:--enable-preview",
                 "-javacoption:--add-exports=org.openjdk.jextract/org.openjdk.jextract.json.parser=ALL-UNNAMED",
                 "-javaoption:--add-exports=org.openjdk.jextract/org.openjdk.jextract.json.parser=ALL-UNNAMED",
                 "-avm", "-conc:auto", "-verbose:summary,fail,error",

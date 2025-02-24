@@ -45,6 +45,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.StringTemplate.*;
+
 /**
  * Superclass for .java source generator classes.
  */
@@ -106,7 +108,7 @@ abstract class ClassSourceBuilder {
         if (superName != null) {
             extendsExpr = " extends " + superName;
         }
-        appendLines("%1$s %2$s %3$s%4$s {", modifiers, kind.kindName, className, extendsExpr);
+        appendLines(str("\{modifiers} \{kind.kindName} \{className}\{extendsExpr} {"));
     }
 
     final void classEnd() {
@@ -147,17 +149,13 @@ abstract class ClassSourceBuilder {
         sb.appendIndentedLines(s);
     }
 
-    void appendIndentedLines(String s, String... args) {
-        sb.appendIndentedLines(format(s, args));
-    }
-
     final void emitDefaultConstructor() {
-        appendIndentedLines("""
+        appendIndentedLines(str("""
 
-            %1$s() {
+            \{className}() {
                 // Should not be called directly
             }
-            """, className);
+            """));
     }
 
     final void emitDocComment(Declaration decl) {
@@ -165,14 +163,14 @@ abstract class ClassSourceBuilder {
     }
 
     final void emitDocComment(Declaration decl, String header) {
-        appendLines("""
+        appendLines(str("""
             /**
-            %1$s\
+            \{!header.isEmpty() ? " * \{header}\n" : ""}\
              * {@snippet lang=c :
-            %2$s
+            \{declarationComment(decl)}
              * }
              */
-            """, !header.isEmpty() ? String.format(" * %1$s\n", header) : "", declarationComment(decl));
+            """));
     }
 
     public String mangleName(String javaName, Class<?> type) {
@@ -204,7 +202,7 @@ abstract class ClassSourceBuilder {
             case Delegated d when d.kind() == Delegated.Kind.POINTER -> alignIfNeeded(runtimeHelperName() + ".C_POINTER", 8, align);
             case Delegated d -> layoutString(d.type(), align);
             case Function _ -> alignIfNeeded(runtimeHelperName() + ".C_POINTER", 8, align);
-            case Array a -> String.format("MemoryLayout.sequenceLayout(%1$d, %2$s)", a.elementCount().orElse(0L), layoutString(a.elementType(), align));
+            case Array a -> str("MemoryLayout.sequenceLayout(\{a.elementCount().orElse(0L)}, \{layoutString(a.elementType(), align)})");
             default -> throw new UnsupportedOperationException();
         };
     }
@@ -216,7 +214,7 @@ abstract class ClassSourceBuilder {
         if (!type.returnType().equals(void.class)) {
             builder.append("FunctionDescriptor.of(");
             builder.append("\n");
-            builder.append(String.format("%1$s%2$s", indentString(textBoxIndent + 1), layoutString(functionType.returnType())));
+            builder.append(str("\{indentString(textBoxIndent + 1)}\{layoutString(functionType.returnType())}"));
             if (!noArgs) {
                 builder.append(",");
             }
@@ -228,7 +226,7 @@ abstract class ClassSourceBuilder {
             String delim = "";
             for (Type arg : functionType.argumentTypes()) {
                 builder.append(delim);
-                builder.append(String.format("%1$s%2$s", indentString(textBoxIndent + 1), layoutString(arg)));
+                builder.append(str("\{indentString(textBoxIndent + 1)}\{layoutString(arg)}"));
                 delim = ",\n";
             }
             builder.append("\n");
@@ -262,12 +260,12 @@ abstract class ClassSourceBuilder {
 
     private String alignIfNeeded(String layoutPrefix, long align, long expectedAlign) {
         return align > expectedAlign ?
-                String.format("%1$s.align(%2$s, %3$d)", runtimeHelperName(), layoutPrefix, expectedAlign) :
+                str("\{runtimeHelperName()}.align(\{layoutPrefix}, \{expectedAlign})") :
                 layoutPrefix;
     }
 
     String paddingLayoutString(long size, int indent) {
-        return String.format("%1$sMemoryLayout.paddingLayout(%2$d)", indentString(indent), size);
+        return str("\{indentString(indent)}MemoryLayout.paddingLayout(\{size})");
     }
 
     // Return C source style signature for the given declaration.

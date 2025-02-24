@@ -60,6 +60,8 @@ import org.openjdk.jextract.impl.DeclarationImpl.ClangSizeOf;
 import org.openjdk.jextract.impl.DeclarationImpl.NestedDeclarations;
 import org.openjdk.jextract.impl.DeclarationImpl.DeclarationString;
 
+import static java.lang.StringTemplate.str;
+
 /**
  * This class turns a clang cursor into a jextract declaration. All declarations are de-duplicated,
  * based on the declaration position. Because of this, the tree maker's declaration cache effectively
@@ -232,12 +234,12 @@ class TreeMaker {
         String valueString = value.toString();
         if (value instanceof String) {
             // quote string literal
-            valueString = String.format("\"%1$s\"", valueString);
+            valueString = str("\"\{valueString}\"");
         } else if (Utils.isPointer(type)) {
             // add pointer cast to make it look different from a numeric constant
-            valueString = String.format("(void*) %1$s", valueString);
+            valueString = str("(void*) \{valueString}");
         }
-        DeclarationString.with(macro, String.format("#define %1$s %2$s", name, valueString));
+        DeclarationString.with(macro, str("#define \{name} \{valueString}"));
         return macro;
     }
 
@@ -536,6 +538,6 @@ class TreeMaker {
         if (enumName.isEmpty()) {
             enumName = "<anonymous>";
         }
-        return String.format("enum %1$s.%2$s = %3$s", enumName, enumConstant.name(), enumConstant.value());
+        return str("enum \{enumName}.\{enumConstant.name()} = \{enumConstant.value()}");
     }
 }
